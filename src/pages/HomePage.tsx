@@ -5,6 +5,7 @@ import { ArticleCard } from '../components/ArticleCard';
 import { Newsletter } from '../components/Newsletter';
 import { CategoryGrid } from '../components/CategoryGrid';
 import { TagCloud } from '../components/TagCloud';
+import { AdSidebar } from '../components/AdSidebar';
 
 interface HomePageProps {
   articles: Article[];
@@ -128,7 +129,7 @@ export function HomePage({ articles, onArticleSelect, onCategorySelect }: HomePa
         </div>
       </section>
 
-      {/* Latest Articles */}
+      {/* Latest Articles with Sidebar */}
       <section className="py-16 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -140,14 +141,26 @@ export function HomePage({ articles, onArticleSelect, onCategorySelect }: HomePa
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {latestArticles.map((article) => (
-              <ArticleCard
-                key={article.id}
-                article={article}
-                onReadMore={onArticleSelect}
-              />
-            ))}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Articles */}
+            <div className="lg:col-span-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {latestArticles.map((article) => (
+                  <ArticleCard
+                    key={article.id}
+                    article={article}
+                    onReadMore={onArticleSelect}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Sidebar with Ads */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-8">
+                <AdSidebar />
+              </div>
+            </div>
           </div>
         </div>
       </section>

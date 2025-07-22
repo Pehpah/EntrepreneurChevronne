@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Eye, Save, X, Upload, Calendar, Tag, User, Clock, BarChart3, Users, MessageCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Save, X, Upload, Calendar, Tag, User, Clock, BarChart3, Users, MessageCircle, DollarSign } from 'lucide-react';
 import { Article } from '../types';
 import { articles as initialArticles } from '../data/articles';
 import { categories } from '../data/categories';
 import { AdminStats } from '../components/AdminStats';
 import { AdminNewsletterManager } from '../components/AdminNewsletterManager';
+import { AdminAdManager } from '../components/AdminAdManager';
 
 export function AdminPage() {
   const [articles, setArticles] = useState<Article[]>(initialArticles);
   const [isEditing, setIsEditing] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'articles' | 'newsletter' | 'comments'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'articles' | 'newsletter' | 'comments' | 'ads'>('dashboard');
   const [formData, setFormData] = useState({
     title: '',
     excerpt: '',
@@ -135,6 +136,7 @@ export function AdminPage() {
                   { id: 'dashboard', name: 'Tableau de bord', icon: BarChart3 },
                   { id: 'articles', name: 'Articles', icon: Edit },
                   { id: 'newsletter', name: 'Newsletter', icon: Users },
+                  { id: 'ads', name: 'Publicités', icon: DollarSign },
                   { id: 'comments', name: 'Commentaires', icon: MessageCircle },
                 ].map((tab) => (
                   <button
@@ -350,6 +352,8 @@ export function AdminPage() {
             {activeTab === 'dashboard' && <AdminStats />}
             
             {activeTab === 'newsletter' && <AdminNewsletterManager />}
+            
+            {activeTab === 'ads' && <AdminAdManager />}
             
             {activeTab === 'comments' && (
               <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-sm border border-slate-200 dark:border-slate-700">

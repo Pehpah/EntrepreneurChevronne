@@ -34,3 +34,25 @@ export interface Category {
   description: string;
   icon: string;
 }
+
+export interface Advertisement {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  targetUrl: string;
+  sponsor: string;
+  position: 'sidebar' | 'article-top' | 'article-middle' | 'article-bottom' | 'header' | 'footer' | 'between-articles';
+  isActive: boolean;
+  startDate: string;
+  endDate: string;
+  clickCount: number;
+  impressions: number;
+  priority: number; // 1-10, higher = more priority
+}
+
+export interface AdPlacement {
+  position: string;
+  maxAds: number;
+  enabled: boolean;
+}

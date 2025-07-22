@@ -6,6 +6,8 @@ import { formatDate } from '../utils/dateUtils';
 import { SocialShare } from './SocialShare';
 import { Breadcrumb } from './Breadcrumb';
 import { CommentsSection } from './CommentsSection';
+import { AdBanner } from './AdBanner';
+import { useAdvertisements } from '../hooks/useAdvertisements';
 
 interface ArticleDetailProps {
   article: Article;
@@ -14,6 +16,10 @@ interface ArticleDetailProps {
 
 export function ArticleDetail({ article, onBack }: ArticleDetailProps) {
   const category = categories.find(cat => cat.slug === article.category);
+  const { getAdsByPosition } = useAdvertisements();
+  
+  const topAds = getAdsByPosition('article-top', 1);
+  const bottomAds = getAdsByPosition('article-bottom', 1);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -78,6 +84,13 @@ export function ArticleDetail({ article, onBack }: ArticleDetailProps) {
             {article.excerpt}
           </p>
 
+          {/* Top Advertisement */}
+          {topAds.length > 0 && (
+            <div className="mb-8">
+              <AdBanner ad={topAds[0]} size="large" />
+            </div>
+          )}
+
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mb-8">
             {article.tags.map((tag) => (
@@ -96,6 +109,13 @@ export function ArticleDetail({ article, onBack }: ArticleDetailProps) {
           <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:text-slate-900 dark:prose-headings:text-white prose-a:text-orange-600 dark:prose-a:text-orange-400">
             <div dangerouslySetInnerHTML={{ __html: article.content.replace(/\n/g, '<br>') }} />
           </div>
+
+          {/* Bottom Advertisement */}
+          {bottomAds.length > 0 && (
+            <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700">
+              <AdBanner ad={bottomAds[0]} size="large" />
+            </div>
+          )}
         </div>
       </article>
 
