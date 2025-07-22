@@ -56,3 +56,59 @@ export interface AdPlacement {
   maxAds: number;
   enabled: boolean;
 }
+
+export interface AnalyticsEvent {
+  id: string;
+  type: 'page_view' | 'article_view' | 'article_read' | 'comment_add' | 'newsletter_signup' | 'ad_click' | 'search' | 'category_view';
+  timestamp: string;
+  data: {
+    page?: string;
+    articleId?: string;
+    category?: string;
+    searchQuery?: string;
+    adId?: string;
+    duration?: number;
+    scrollDepth?: number;
+    referrer?: string;
+    userAgent?: string;
+    sessionId?: string;
+  };
+}
+
+export interface PageView {
+  id: string;
+  path: string;
+  title: string;
+  timestamp: string;
+  duration?: number;
+  scrollDepth?: number;
+  referrer?: string;
+  sessionId: string;
+}
+
+export interface UserSession {
+  id: string;
+  startTime: string;
+  endTime?: string;
+  pageViews: number;
+  events: number;
+  isReturning: boolean;
+  source?: string;
+  device?: 'desktop' | 'tablet' | 'mobile';
+}
+
+export interface AnalyticsMetrics {
+  totalPageViews: number;
+  uniqueVisitors: number;
+  averageSessionDuration: number;
+  bounceRate: number;
+  topPages: { path: string; views: number; title: string }[];
+  topArticles: { id: string; views: number; title: string }[];
+  topCategories: { slug: string; views: number; name: string }[];
+  topSearchQueries: { query: string; count: number }[];
+  deviceBreakdown: { desktop: number; tablet: number; mobile: number };
+  trafficSources: { source: string; count: number }[];
+  dailyViews: { date: string; views: number }[];
+  weeklyViews: { week: string; views: number }[];
+  monthlyViews: { month: string; views: number }[];
+}

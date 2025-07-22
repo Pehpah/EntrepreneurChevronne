@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Eye, Save, X, Upload, Calendar, Tag, User, Clock, BarChart3, Users, MessageCircle, DollarSign } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Save, X, Upload, Calendar, Tag, User, Clock, BarChart3, Users, MessageCircle, DollarSign, TrendingUp } from 'lucide-react';
 import { Article } from '../types';
 import { articles as initialArticles } from '../data/articles';
 import { categories } from '../data/categories';
 import { AdminStats } from '../components/AdminStats';
 import { AdminNewsletterManager } from '../components/AdminNewsletterManager';
 import { AdminAdManager } from '../components/AdminAdManager';
+import { AnalyticsDashboard } from '../components/AnalyticsDashboard';
 
 export function AdminPage() {
   const [articles, setArticles] = useState<Article[]>(initialArticles);
   const [isEditing, setIsEditing] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'articles' | 'newsletter' | 'comments' | 'ads'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'articles' | 'newsletter' | 'comments' | 'ads' | 'analytics'>('dashboard');
   const [formData, setFormData] = useState({
     title: '',
     excerpt: '',
@@ -134,6 +135,7 @@ export function AdminPage() {
               <nav className="flex space-x-8">
                 {[
                   { id: 'dashboard', name: 'Tableau de bord', icon: BarChart3 },
+                  { id: 'analytics', name: 'Analytics', icon: TrendingUp },
                   { id: 'articles', name: 'Articles', icon: Edit },
                   { id: 'newsletter', name: 'Newsletter', icon: Users },
                   { id: 'ads', name: 'Publicités', icon: DollarSign },
@@ -350,6 +352,8 @@ export function AdminPage() {
           <div className="space-y-6">
             {/* Tab Content */}
             {activeTab === 'dashboard' && <AdminStats />}
+            
+            {activeTab === 'analytics' && <AnalyticsDashboard />}
             
             {activeTab === 'newsletter' && <AdminNewsletterManager />}
             
