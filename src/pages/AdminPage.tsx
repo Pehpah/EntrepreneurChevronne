@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Eye, Save, X, Upload, Calendar, Tag, User, Clock } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Save, X, Upload, Calendar, Tag, User, Clock, BarChart3, Users, MessageCircle } from 'lucide-react';
 import { Article } from '../types';
 import { articles as initialArticles } from '../data/articles';
 import { categories } from '../data/categories';
+import { AdminStats } from '../components/AdminStats';
+import { AdminNewsletterManager } from '../components/AdminNewsletterManager';
 
 export function AdminPage() {
   const [articles, setArticles] = useState<Article[]>(initialArticles);
   const [isEditing, setIsEditing] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'articles' | 'newsletter' | 'comments'>('dashboard');
   const [formData, setFormData] = useState({
     title: '',
     excerpt: '',
@@ -123,6 +126,35 @@ export function AdminPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Navigation Tabs */}
+        {!isEditing && (
+          <div className="mb-8">
+            <div className="border-b border-slate-200 dark:border-slate-700">
+              <nav className="flex space-x-8">
+                {[
+                  { id: 'dashboard', name: 'Tableau de bord', icon: BarChart3 },
+                  { id: 'articles', name: 'Articles', icon: Edit },
+                  { id: 'newsletter', name: 'Newsletter', icon: Users },
+                  { id: 'comments', name: 'Commentaires', icon: MessageCircle },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                      activeTab === tab.id
+                        ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                        : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+                    }`}
+                  >
+                    <tab.icon size={16} />
+                    {tab.name}
+                  </button>
+                ))}
+              </nav>
+            </div>
+          </div>
+        )}
+
         {isEditing ? (
           /* Article Editor */
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
@@ -312,8 +344,30 @@ export function AdminPage() {
             </div>
           </div>
         ) : (
-          /* Articles List */
+          /* Tab Content */
           <div className="space-y-6">
+            {/* Tab Content */}
+            {activeTab === 'dashboard' && <AdminStats />}
+            
+            {activeTab === 'newsletter' && <AdminNewsletterManager />}
+            
+            {activeTab === 'comments' && (
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="text-center py-8">
+                  <MessageCircle size={48} className="text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                    Gestion des commentaires
+                  </h3>
+                  <p className="text-slate-500 dark:text-slate-400">
+                    Les commentaires sont maintenant gérés directement sur chaque article.<br />
+                    Rendez-vous sur un article pour voir et modérer les commentaires.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'articles' && (
+              <div className="space-y-6">
             <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
                 Statistiques
@@ -415,6 +469,8 @@ export function AdminPage() {
                 ))}
               </div>
             </div>
+              </div>
+            )}
           </div>
         )}
       </div>
