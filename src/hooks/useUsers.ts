@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
 import { User, UserRole, UserInvitation } from '../types';
 import { defaultUsers, rolePermissions } from '../data/users';
-import { useLocalStorage } from './useLocalStorage';
+import { useStorage } from './useStorage';
 
 export function useUsers() {
-  const [users, setUsers] = useLocalStorage<User[]>('blog-users', defaultUsers);
-  const [invitations, setInvitations] = useLocalStorage<UserInvitation[]>('blog-invitations', []);
+  const [users, setUsers] = useStorage<User[]>('blog-users', defaultUsers);
+  const [invitations, setInvitations] = useStorage<UserInvitation[]>('blog-invitations', []);
 
   const addUser = useCallback((userData: Omit<User, 'id' | 'createdAt' | 'articlesCount' | 'permissions'>) => {
     const newUser: User = {

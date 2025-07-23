@@ -16,8 +16,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadTheme = async () => {
       try {
-        const { simpleIndexedDB } = await import('../utils/simpleIndexedDB');
-        const saved = await simpleIndexedDB.getItem<string>('blog-theme');
+        const { storage } = await import('../utils/storage');
+        const saved = await storage.getItem<string>('blog-theme');
         if (saved && (saved === 'light' || saved === 'dark')) {
           setTheme(saved as Theme);
         }
@@ -32,8 +32,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const saveTheme = async () => {
       try {
-        const { simpleIndexedDB } = await import('../utils/simpleIndexedDB');
-        await simpleIndexedDB.setItem('blog-theme', theme);
+        const { storage } = await import('../utils/storage');
+        await storage.setItem('blog-theme', theme);
       } catch (error) {
         console.error('Error saving theme to storage:', error);
       }

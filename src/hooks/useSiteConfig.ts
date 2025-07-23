@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
 import { SiteConfiguration } from '../types';
 import { defaultSiteConfig } from '../data/siteConfig';
-import { useSimpleStorage } from './useSimpleStorage';
+import { useStorage } from './useStorage';
 
 export function useSiteConfig() {
-  const [siteConfig, setSiteConfig] = useSimpleStorage<SiteConfiguration>('blog-site-config', defaultSiteConfig);
+  const [siteConfig, setSiteConfig] = useStorage<SiteConfiguration>('blog-site-config', defaultSiteConfig);
 
   const updateLogo = useCallback((logoData: Partial<SiteConfiguration['logo']>) => {
     setSiteConfig(prev => ({

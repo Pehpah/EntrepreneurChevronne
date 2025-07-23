@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Comment } from '../types';
-import { useSimpleStorage } from './useSimpleStorage';
+import { useStorage } from './useStorage';
 
 export function useComments(articleId: string) {
-  const [allComments, setAllComments] = useSimpleStorage<Comment[]>('blog-comments', []);
+  const [allComments, setAllComments] = useStorage<Comment[]>('blog-comments', []);
   const [comments, setComments] = useState<Comment[]>([]);
 
   // Filter comments for this article

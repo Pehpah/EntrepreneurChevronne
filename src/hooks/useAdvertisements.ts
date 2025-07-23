@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
 import { Advertisement } from '../types';
 import { advertisements as initialAds } from '../data/advertisements';
-import { useSimpleStorage } from './useSimpleStorage';
+import { useStorage } from './useStorage';
 
 export function useAdvertisements() {
-  const [ads, setAds] = useSimpleStorage<Advertisement[]>('blog-advertisements', initialAds);
-  const [adStats, setAdStats] = useSimpleStorage<Record<string, { clicks: number; impressions: number }>>('ad-stats', {});
+  const [ads, setAds] = useStorage<Advertisement[]>('blog-advertisements', initialAds);
+  const [adStats, setAdStats] = useStorage<Record<string, { clicks: number; impressions: number }>>('ad-stats', {});
 
   // Get active ads for a specific position
   const getAdsByPosition = (position: Advertisement['position'], limit?: number) => {

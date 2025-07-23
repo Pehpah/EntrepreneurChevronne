@@ -202,11 +202,9 @@ function App() {
 
     if (currentPage === 'search') {
       return (
-        <SearchResultsPage
-          searchQuery={searchQuery}
-          articles={articles}
+        <SearchResultsPage 
+          query={searchQuery}
           onArticleSelect={handleArticleSelect}
-          onBack={handleBackToHome}
         />
       );
     }
