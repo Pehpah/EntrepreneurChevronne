@@ -1,7 +1,11 @@
 import React from 'react';
 import { Mail, Linkedin, Twitter, Facebook, BookOpen } from 'lucide-react';
 
-export function Footer() {
+interface FooterProps {
+  onPageChange?: (page: string) => void;
+}
+
+export function Footer({ onPageChange }: FooterProps) {
   return (
     <footer className="bg-slate-900 dark:bg-slate-950 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -53,25 +57,73 @@ export function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Navigation</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="text-slate-300 hover:text-white transition-colors duration-300">Accueil</a></li>
-              <li><a href="#" className="text-slate-300 hover:text-white transition-colors duration-300">Articles</a></li>
-              <li><a href="#" className="text-slate-300 hover:text-white transition-colors duration-300">Catégories</a></li>
-              <li><a href="#" className="text-slate-300 hover:text-white transition-colors duration-300">Témoignages</a></li>
-              <li><a href="#" className="text-slate-300 hover:text-white transition-colors duration-300">Ressources</a></li>
+              <li>
+                <button 
+                  onClick={() => onPageChange?.('accueil')} 
+                  className="text-slate-300 hover:text-white transition-colors duration-300"
+                >
+                  Accueil
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => onPageChange?.('articles')} 
+                  className="text-slate-300 hover:text-white transition-colors duration-300"
+                >
+                  Articles
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => onPageChange?.('temoignages')} 
+                  className="text-slate-300 hover:text-white transition-colors duration-300"
+                >
+                  Témoignages
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => onPageChange?.('ressources')} 
+                  className="text-slate-300 hover:text-white transition-colors duration-300"
+                >
+                  Ressources
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => onPageChange?.('collaborations')} 
+                  className="text-slate-300 hover:text-white transition-colors duration-300"
+                >
+                  Collaborations
+                </button>
+              </li>
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Contact & Legal */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Contact</h4>
+            <h4 className="text-lg font-semibold mb-4">Contact & Légal</h4>
             <ul className="space-y-2">
               <li className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-slate-400" />
                 <span className="text-slate-300">contact@entrepreneur-chevronne.com</span>
               </li>
-              <li><a href="#" className="text-slate-300 hover:text-white transition-colors duration-300">À propos</a></li>
-              <li><a href="#" className="text-slate-300 hover:text-white transition-colors duration-300">Collaboration</a></li>
-              <li><a href="#" className="text-slate-300 hover:text-white transition-colors duration-300">Mentions légales</a></li>
+              <li>
+                <button 
+                  onClick={() => onPageChange?.('a-propos')} 
+                  className="text-slate-300 hover:text-white transition-colors duration-300"
+                >
+                  À propos
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => onPageChange?.('legal')} 
+                  className="text-slate-300 hover:text-white transition-colors duration-300"
+                >
+                  Mentions légales
+                </button>
+              </li>
             </ul>
           </div>
         </div>

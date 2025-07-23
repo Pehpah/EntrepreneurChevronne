@@ -8,6 +8,10 @@ import { AdvertiserPage } from './pages/AdvertiserPage';
 import { ResourcesPage } from './pages/ResourcesPage';
 import { AdminPage } from './pages/AdminPage';
 import { SearchResultsPage } from './pages/SearchResultsPage';
+import { TestimonialsPage } from './pages/TestimonialsPage';
+import { LegalPage } from './pages/LegalPage';
+import { CollaborationsPage } from './pages/CollaborationsPage';
+import { ArticlesPage } from './pages/ArticlesPage';
 import { ArticleDetail } from './components/ArticleDetail';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { articles } from './data/articles';
@@ -23,7 +27,7 @@ import { EmergencyCleanup } from './components/EmergencyCleanup';
 import { autoCleanupIfNeeded } from './utils/storageCleanup';
 import { EMERGENCY_RESET, checkStorageStatus, testLocalStorageWrite } from './utils/emergencyCleanup';
 
-type Page = 'accueil' | 'annonceur' | 'gestion-quotidienne' | 'strategie' | 'marketing' | 'finance' | 'productivite' | 'temoignages' | 'ressources' | 'a-propos' | 'admin' | 'search' | 'article-detail';
+type Page = 'accueil' | 'annonceur' | 'gestion-quotidienne' | 'strategie' | 'marketing' | 'finance' | 'productivite' | 'temoignages' | 'ressources' | 'a-propos' | 'admin' | 'search' | 'article-detail' | 'articles' | 'legal' | 'collaborations';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('accueil');
@@ -212,7 +216,6 @@ function App() {
       case 'marketing':
       case 'finance':
       case 'productivite':
-      case 'temoignages':
         return (
           <CategoryPage
             categorySlug={currentPage}
@@ -220,6 +223,14 @@ function App() {
             onArticleSelect={handleArticleSelect}
           />
         );
+      case 'temoignages':
+        return <TestimonialsPage />;
+      case 'articles':
+        return <ArticlesPage />;
+      case 'legal':
+        return <LegalPage />;
+      case 'collaborations':
+        return <CollaborationsPage />;
       default:
         return (
           <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
@@ -255,7 +266,7 @@ function App() {
           {renderPage()}
         </main>
 
-        <Footer />
+        <Footer onPageChange={handlePageChange} />
         <BackToTop />
         <EmergencyCleanup />
       </div>

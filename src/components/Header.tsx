@@ -13,14 +13,10 @@ interface HeaderProps {
 
 const menuItems = [
   { id: 'accueil', label: 'Accueil' },
-  { id: 'annonceur', label: 'Annonceur' },
-  { id: 'gestion-quotidienne', label: 'Gestion quotidienne' },
-  { id: 'strategie', label: 'Stratégie' },
-  { id: 'marketing', label: 'Marketing' },
-  { id: 'finance', label: 'Finance' },
-  { id: 'productivite', label: 'Productivité' },
+  { id: 'articles', label: 'Articles' },
   { id: 'temoignages', label: 'Témoignages' },
-  { id: 'ressources', label: 'Ressources & Outils' },
+  { id: 'ressources', label: 'Ressources' },
+  { id: 'collaborations', label: 'Collaborations' },
   { id: 'a-propos', label: 'À propos' }
 ];
 
