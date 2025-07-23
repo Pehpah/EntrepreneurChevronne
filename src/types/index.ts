@@ -102,13 +102,43 @@ export interface AnalyticsMetrics {
   uniqueVisitors: number;
   averageSessionDuration: number;
   bounceRate: number;
-  topPages: { path: string; views: number; title: string }[];
-  topArticles: { id: string; views: number; title: string }[];
-  topCategories: { slug: string; views: number; name: string }[];
+  topPages: { page: string; views: number }[];
+  topArticles: { title: string; views: number }[];
+  topCategories: { category: string; views: number }[];
   topSearchQueries: { query: string; count: number }[];
   deviceBreakdown: { desktop: number; tablet: number; mobile: number };
-  trafficSources: { source: string; count: number }[];
+  trafficSources: { direct: number; search: number; social: number; referral: number };
   dailyViews: { date: string; views: number }[];
   weeklyViews: { week: string; views: number }[];
   monthlyViews: { month: string; views: number }[];
+}
+
+export interface SiteConfiguration {
+  logo: {
+    text: string;
+    subtitle: string;
+    icon: string; // lucide icon name or image URL
+    showIcon: boolean;
+    showText: boolean;
+  };
+  hero: {
+    title: string;
+    subtitle: string;
+    backgroundImage: string;
+    ctaButtons: {
+      primary: { text: string; action: string };
+      secondary: { text: string; action: string };
+    };
+    stats: {
+      articles: { value: string; label: string };
+      users: { value: string; label: string };
+      satisfaction: { value: string; label: string };
+      growth: { value: string; label: string };
+    };
+  };
+  theme: {
+    primaryColor: string;
+    secondaryColor: string;
+    accentColor: string;
+  };
 }

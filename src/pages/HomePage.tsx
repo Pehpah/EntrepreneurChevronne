@@ -6,6 +6,7 @@ import { Newsletter } from '../components/Newsletter';
 import { CategoryGrid } from '../components/CategoryGrid';
 import { TagCloud } from '../components/TagCloud';
 import { AdSidebar } from '../components/AdSidebar';
+import { useSiteConfig } from '../hooks/useSiteConfig';
 
 interface HomePageProps {
   articles: Article[];
@@ -16,6 +17,7 @@ interface HomePageProps {
 export function HomePage({ articles, onArticleSelect, onCategorySelect }: HomePageProps) {
   const featuredArticles = articles.filter(article => article.featured);
   const latestArticles = articles.slice(0, 4);
+  const { siteConfig } = useSiteConfig();
   
   // Extract all unique tags from articles
   const allTags = Array.from(new Set(articles.flatMap(article => article.tags)));
@@ -24,28 +26,51 @@ export function HomePage({ articles, onArticleSelect, onCategorySelect }: HomePa
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-slate-900 to-slate-800 text-white py-20 lg:py-32">
-        <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg')] bg-cover bg-center opacity-20"></div>
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-20"
+          style={{ backgroundImage: `url('${siteConfig.hero.backgroundImage}')` }}
+        ></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              Transformez vos <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">idées</span> en <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">succès</span>
+              {siteConfig.hero.title.split(' ').map((word, index) => {
+                const isHighlighted = word === 'idées' || word === 'succès';
+                return (
+                  <span key={index}>
+                    {isHighlighted ? (
+                      <span 
+                        className="text-transparent bg-clip-text"
+                        style={{
+                          backgroundImage: `linear-gradient(to right, ${siteConfig.theme.accentColor}, ${siteConfig.theme.primaryColor})`
+                        }}
+                      >
+                        {word}
+                      </span>
+                    ) : (
+                      word
+                    )}{' '}
+                  </span>
+                );
+              })}
             </h1>
             <p className="text-xl lg:text-2xl text-slate-300 mb-8">
-              Découvrez les stratégies, outils et témoignages d'entrepreneurs qui ont transformé leur vision en réalité. 
-              Rejoignez une communauté de leaders visionnaires.
+              {siteConfig.hero.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button
-                onClick={() => onCategorySelect('strategie')}
-                className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-300"
+                onClick={() => onCategorySelect(siteConfig.hero.ctaButtons.primary.action)}
+                className="px-8 py-4 text-white font-semibold rounded-lg transform hover:scale-105 transition-all duration-300"
+                style={{
+                  background: `linear-gradient(to right, ${siteConfig.theme.primaryColor}, ${siteConfig.theme.secondaryColor})`
+                }}
               >
-                Explorer les stratégies
+                {siteConfig.hero.ctaButtons.primary.text}
               </button>
               <button
-                onClick={() => onCategorySelect('temoignages')}
+                onClick={() => onCategorySelect(siteConfig.hero.ctaButtons.secondary.action)}
                 className="px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-slate-900 transition-all duration-300"
               >
-                Lire les témoignages
+                {siteConfig.hero.ctaButtons.secondary.text}
               </button>
             </div>
           </div>
@@ -57,32 +82,37 @@ export function HomePage({ articles, onArticleSelect, onCategorySelect }: HomePa
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mb-4">
+              <div 
+                className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
+                style={{
+                  background: `linear-gradient(to right, ${siteConfig.theme.primaryColor}, ${siteConfig.theme.secondaryColor})`
+                }}
+              >
                 <BookOpen className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">500+</h3>
-              <p className="text-slate-600 dark:text-slate-400">Articles publiés</p>
+              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{siteConfig.hero.stats.articles.value}</h3>
+              <p className="text-slate-600 dark:text-slate-400">{siteConfig.hero.stats.articles.label}</p>
             </div>
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full mb-4">
                 <Users className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">50K+</h3>
-              <p className="text-slate-600 dark:text-slate-400">Entrepreneurs connectés</p>
+              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{siteConfig.hero.stats.users.value}</h3>
+              <p className="text-slate-600 dark:text-slate-400">{siteConfig.hero.stats.users.label}</p>
             </div>
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mb-4">
                 <TrendingUp className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">95%</h3>
-              <p className="text-slate-600 dark:text-slate-400">Taux de satisfaction</p>
+              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{siteConfig.hero.stats.satisfaction.value}</h3>
+              <p className="text-slate-600 dark:text-slate-400">{siteConfig.hero.stats.satisfaction.label}</p>
             </div>
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mb-4">
                 <Award className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">200+</h3>
-              <p className="text-slate-600 dark:text-slate-400">Success stories</p>
+              <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{siteConfig.hero.stats.growth.value}</h3>
+              <p className="text-slate-600 dark:text-slate-400">{siteConfig.hero.stats.growth.label}</p>
             </div>
           </div>
         </div>

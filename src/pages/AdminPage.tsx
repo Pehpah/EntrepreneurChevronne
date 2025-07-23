@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Eye, Save, X, Upload, Calendar, Tag, User, Clock, BarChart3, Users, MessageCircle, DollarSign, TrendingUp } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Save, X, Upload, Calendar, Tag, User, Clock, BarChart3, Users, MessageCircle, DollarSign, TrendingUp, Settings } from 'lucide-react';
 import { Article } from '../types';
 import { articles as initialArticles } from '../data/articles';
 import { categories } from '../data/categories';
@@ -7,13 +7,14 @@ import { AdminStats } from '../components/AdminStats';
 import { AdminNewsletterManager } from '../components/AdminNewsletterManager';
 import { AdminAdManager } from '../components/AdminAdManager';
 import { AnalyticsDashboard } from '../components/AnalyticsDashboard';
+import { AdminSiteConfig } from '../components/AdminSiteConfig';
 
 export function AdminPage() {
   const [articles, setArticles] = useState<Article[]>(initialArticles);
   const [isEditing, setIsEditing] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'articles' | 'newsletter' | 'comments' | 'ads' | 'analytics'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'articles' | 'newsletter' | 'comments' | 'ads' | 'analytics' | 'config'>('dashboard');
   const [formData, setFormData] = useState({
     title: '',
     excerpt: '',
@@ -140,6 +141,7 @@ export function AdminPage() {
                   { id: 'newsletter', name: 'Newsletter', icon: Users },
                   { id: 'ads', name: 'Publicités', icon: DollarSign },
                   { id: 'comments', name: 'Commentaires', icon: MessageCircle },
+                  { id: 'config', name: 'Configuration', icon: Settings },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -358,6 +360,8 @@ export function AdminPage() {
             {activeTab === 'newsletter' && <AdminNewsletterManager />}
             
             {activeTab === 'ads' && <AdminAdManager />}
+            
+            {activeTab === 'config' && <AdminSiteConfig />}
             
             {activeTab === 'comments' && (
               <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-sm border border-slate-200 dark:border-slate-700">

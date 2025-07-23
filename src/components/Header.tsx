@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Menu, X, Sun, Moon, Search, BookOpen } from 'lucide-react';
+import { Menu, X, Sun, Moon, Search, BookOpen, Star, TrendingUp, Users, Award, Zap } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { SearchBar } from './SearchBar';
+import { useSiteConfig } from '../hooks/useSiteConfig';
 
 interface HeaderProps {
   currentPage: string;
@@ -26,6 +27,18 @@ const menuItems = [
 export function Header({ currentPage, onPageChange, onSearch }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { siteConfig } = useSiteConfig();
+
+  const iconMap = {
+    BookOpen,
+    Star,
+    TrendingUp,
+    Users,
+    Award,
+    Zap,
+  };
+
+  const LogoIcon = iconMap[siteConfig.logo.icon as keyof typeof iconMap] || BookOpen;
 
 
   return (
@@ -37,17 +50,26 @@ export function Header({ currentPage, onPageChange, onSearch }: HeaderProps) {
             className="flex items-center space-x-3 cursor-pointer group"
             onClick={() => onPageChange('accueil')}
           >
-            <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-2 rounded-lg group-hover:from-orange-600 group-hover:to-orange-700 transition-all duration-300">
-              <BookOpen className="h-6 w-6 text-white" />
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                Entrepreneur Chevronné
-              </h1>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
-                Votre guide vers le succès
-              </p>
-            </div>
+            {siteConfig.logo.showIcon && (
+              <div 
+                className="p-2 rounded-lg group-hover:opacity-80 transition-all duration-300"
+                style={{
+                  background: `linear-gradient(to right, ${siteConfig.theme.primaryColor}, ${siteConfig.theme.secondaryColor})`
+                }}
+              >
+                <LogoIcon className="h-6 w-6 text-white" />
+              </div>
+            )}
+            {siteConfig.logo.showText && (
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                  {siteConfig.logo.text}
+                </h1>
+                <p className="text-xs text-slate-600 dark:text-slate-400">
+                  {siteConfig.logo.subtitle}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Desktop Navigation */}
