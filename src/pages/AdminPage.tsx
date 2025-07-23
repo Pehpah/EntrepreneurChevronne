@@ -11,6 +11,7 @@ import { AdminSiteConfig } from '../components/AdminSiteConfig';
 import { AdminUserManager } from '../components/AdminUserManager';
 
 export function AdminPage() {
+  console.log('🎯 AdminPage chargée !');
   const [articles, setArticles] = useState<Article[]>(initialArticles);
   const [isEditing, setIsEditing] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
