@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { AnalyticsEvent, PageView, UserSession, AnalyticsMetrics } from '../types';
 import { useLocalStorage } from './useLocalStorage';
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback } from 'react';
 import { Advertisement } from '../types';
 import { advertisements as initialAds } from '../data/advertisements';
 import { useLocalStorage } from './useLocalStorage';

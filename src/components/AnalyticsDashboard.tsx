@@ -10,7 +10,6 @@ import {
   Tablet, 
   Smartphone,
   Search,
-  MessageCircle,
   FileText,
   Calendar
 } from 'lucide-react';

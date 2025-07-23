@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Eye, TrendingUp, DollarSign, MousePointer, BarChart } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, TrendingUp, DollarSign, MousePointer } from 'lucide-react';
 import { Advertisement } from '../types';
 import { useAdvertisements } from '../hooks/useAdvertisements';
 import { AdBanner } from './AdBanner';
