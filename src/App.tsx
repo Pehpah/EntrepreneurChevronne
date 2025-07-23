@@ -19,6 +19,7 @@ import { defaultSEO, generateArticleSEO, generateCategorySEO } from './utils/seo
 import { categories } from './data/categories';
 import { useAuth } from './hooks/useAuth';
 import { LoginForm } from './components/LoginForm';
+import { autoCleanupIfNeeded } from './utils/storageCleanup';
 
 type Page = 'accueil' | 'annonceur' | 'gestion-quotidienne' | 'strategie' | 'marketing' | 'finance' | 'productivite' | 'temoignages' | 'ressources' | 'a-propos' | 'admin' | 'search' | 'article-detail';
 
@@ -31,6 +32,11 @@ function App() {
   
   const { trackPageView, trackEvent, trackSearch } = useAnalytics();
   const { isAuthenticated, isLoading, hasPermission } = useAuth();
+
+  // Auto-cleanup localStorage au démarrage
+  useEffect(() => {
+    autoCleanupIfNeeded();
+  }, []);
 
   // SEO Management
   const getSEOData = () => {
