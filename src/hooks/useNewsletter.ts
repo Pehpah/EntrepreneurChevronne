@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useLocalStorage } from './useLocalStorage';
+import { useSimpleStorage } from './useSimpleStorage';
 import { NewsletterSubscriber } from '../types';
 
 export function useNewsletter() {
-  const [subscribers, setSubscribers] = useLocalStorage<NewsletterSubscriber[]>('newsletter-subscribers', []);
+  const [subscribers, setSubscribers] = useSimpleStorage<NewsletterSubscriber[]>('newsletter-subscribers', []);
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 

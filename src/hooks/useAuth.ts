@@ -48,7 +48,8 @@ export function useAuth() {
 
   const loadSession = async () => {
     try {
-      const encryptedSession = localStorage.getItem(SESSION_KEY);
+      const { simpleIndexedDB } = await import('../utils/simpleIndexedDB');
+      const encryptedSession = await simpleIndexedDB.getItem<string>(SESSION_KEY);
       if (encryptedSession) {
         const sessionData = await decryptData(encryptedSession);
         if (sessionData && isSessionValid(sessionData)) {
@@ -68,24 +69,31 @@ export function useAuth() {
 
   const saveSession = async (sessionData: AuthSession) => {
     try {
+      const { simpleIndexedDB } = await import('../utils/simpleIndexedDB');
       const encryptedSession = await encryptData(sessionData);
-      localStorage.setItem(SESSION_KEY, encryptedSession);
+      await simpleIndexedDB.setItem(SESSION_KEY, encryptedSession);
     } catch (error) {
       console.error('Failed to save session:', error);
     }
   };
 
-  const clearSession = () => {
-    localStorage.removeItem(SESSION_KEY);
+  const clearSession = async () => {
+    try {
+      const { simpleIndexedDB } = await import('../utils/simpleIndexedDB');
+      await simpleIndexedDB.removeItem(SESSION_KEY);
+    } catch (error) {
+      console.error('Failed to clear session from storage:', error);
+    }
     setSession(null);
     setCurrentUser(null);
   };
 
-  const loadLoginAttempts = () => {
+  const loadLoginAttempts = async () => {
     try {
-      const attempts = localStorage.getItem(LOGIN_ATTEMPTS_KEY);
+      const { simpleIndexedDB } = await import('../utils/simpleIndexedDB');
+      const attempts = await simpleIndexedDB.getItem<LoginAttempt[]>(LOGIN_ATTEMPTS_KEY);
       if (attempts) {
-        setLoginAttempts(JSON.parse(attempts));
+        setLoginAttempts(attempts);
       }
     } catch (error) {
       console.error('Failed to load login attempts:', error);

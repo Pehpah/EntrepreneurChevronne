@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { AnalyticsEvent, PageView, UserSession, AnalyticsMetrics } from '../types';
-import { useLocalStorage } from './useLocalStorage';
+import { useStorage } from './useStorage';
 
 // Configuration des limites de données
 const ANALYTICS_LIMITS = {
@@ -11,10 +11,10 @@ const ANALYTICS_LIMITS = {
 };
 
 export function useAnalytics() {
-  const [events, setEvents] = useLocalStorage<AnalyticsEvent[]>('analytics-events', []);
-  const [pageViews, setPageViews] = useLocalStorage<PageView[]>('analytics-pageviews', []);
-  const [sessions, setSessions] = useLocalStorage<UserSession[]>('analytics-sessions', []);
-  const [currentSession, setCurrentSession] = useLocalStorage<UserSession | null>('current-session', null);
+  const [events, setEvents] = useStorage<AnalyticsEvent[]>('analytics-events', []);
+  const [pageViews, setPageViews] = useStorage<PageView[]>('analytics-pageviews', []);
+  const [sessions, setSessions] = useStorage<UserSession[]>('analytics-sessions', []);
+  const [currentSession, setCurrentSession] = useStorage<UserSession | null>('current-session', null);
 
   // Fonction de nettoyage intelligent
   const cleanupOldData = useCallback(() => {
