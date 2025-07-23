@@ -142,3 +142,52 @@ export interface SiteConfiguration {
     accentColor: string;
   };
 }
+
+export type UserRole = 'admin' | 'editor' | 'author' | 'contributor';
+
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  displayName: string;
+  avatar?: string;
+  role: UserRole;
+  bio?: string;
+  socialLinks?: {
+    twitter?: string;
+    linkedin?: string;
+    website?: string;
+  };
+  isActive: boolean;
+  createdAt: string;
+  lastLogin?: string;
+  articlesCount: number;
+  permissions: UserPermissions;
+}
+
+export interface UserPermissions {
+  canCreateArticles: boolean;
+  canEditOwnArticles: boolean;
+  canEditAllArticles: boolean;
+  canDeleteOwnArticles: boolean;
+  canDeleteAllArticles: boolean;
+  canPublishArticles: boolean;
+  canManageUsers: boolean;
+  canManageComments: boolean;
+  canManageAds: boolean;
+  canManageNewsletter: boolean;
+  canViewAnalytics: boolean;
+  canManageSettings: boolean;
+}
+
+export interface UserInvitation {
+  id: string;
+  email: string;
+  role: UserRole;
+  invitedBy: string;
+  invitedAt: string;
+  expiresAt: string;
+  isAccepted: boolean;
+  acceptedAt?: string;
+}

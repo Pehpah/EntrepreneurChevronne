@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Eye, Save, X, Upload, Calendar, Tag, User, Clock, BarChart3, Users, MessageCircle, DollarSign, TrendingUp, Settings } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Save, X, Upload, Calendar, Tag, User, Clock, BarChart3, Users, MessageCircle, DollarSign, TrendingUp, Settings, UserPlus } from 'lucide-react';
 import { Article } from '../types';
 import { articles as initialArticles } from '../data/articles';
 import { categories } from '../data/categories';
@@ -8,13 +8,14 @@ import { AdminNewsletterManager } from '../components/AdminNewsletterManager';
 import { AdminAdManager } from '../components/AdminAdManager';
 import { AnalyticsDashboard } from '../components/AnalyticsDashboard';
 import { AdminSiteConfig } from '../components/AdminSiteConfig';
+import { AdminUserManager } from '../components/AdminUserManager';
 
 export function AdminPage() {
   const [articles, setArticles] = useState<Article[]>(initialArticles);
   const [isEditing, setIsEditing] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'articles' | 'newsletter' | 'comments' | 'ads' | 'analytics' | 'config'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'articles' | 'newsletter' | 'comments' | 'ads' | 'analytics' | 'config' | 'users'>('dashboard');
   const [formData, setFormData] = useState({
     title: '',
     excerpt: '',
@@ -141,6 +142,7 @@ export function AdminPage() {
                   { id: 'newsletter', name: 'Newsletter', icon: Users },
                   { id: 'ads', name: 'Publicités', icon: DollarSign },
                   { id: 'comments', name: 'Commentaires', icon: MessageCircle },
+                  { id: 'users', name: 'Rédacteurs', icon: UserPlus },
                   { id: 'config', name: 'Configuration', icon: Settings },
                 ].map((tab) => (
                   <button
@@ -362,6 +364,8 @@ export function AdminPage() {
             {activeTab === 'ads' && <AdminAdManager />}
             
             {activeTab === 'config' && <AdminSiteConfig />}
+            
+            {activeTab === 'users' && <AdminUserManager />}
             
             {activeTab === 'comments' && (
               <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-sm border border-slate-200 dark:border-slate-700">
