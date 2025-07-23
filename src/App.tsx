@@ -19,7 +19,9 @@ import { defaultSEO, generateArticleSEO, generateCategorySEO } from './utils/seo
 import { categories } from './data/categories';
 import { useAuth } from './hooks/useAuth';
 import { LoginForm } from './components/LoginForm';
+import { EmergencyCleanup } from './components/EmergencyCleanup';
 import { autoCleanupIfNeeded } from './utils/storageCleanup';
+import { EMERGENCY_RESET, checkStorageStatus, testLocalStorageWrite } from './utils/emergencyCleanup';
 
 type Page = 'accueil' | 'annonceur' | 'gestion-quotidienne' | 'strategie' | 'marketing' | 'finance' | 'productivite' | 'temoignages' | 'ressources' | 'a-propos' | 'admin' | 'search' | 'article-detail';
 
@@ -35,6 +37,24 @@ function App() {
 
   // Auto-cleanup localStorage au démarrage
   useEffect(() => {
+    console.log('🔍 Vérification du localStorage au démarrage...');
+    
+    // Test d'écriture
+    if (!testLocalStorageWrite()) {
+      console.log('🚨 localStorage défaillant, reset complet nécessaire');
+      EMERGENCY_RESET();
+      return;
+    }
+    
+    // Vérification de l'état
+    const status = checkStorageStatus();
+    if (parseFloat(status.totalMB) > 4) {
+      console.log('🚨 localStorage trop plein, reset complet...');
+      EMERGENCY_RESET();
+      return;
+    }
+    
+    // Nettoyage normal
     autoCleanupIfNeeded();
   }, []);
 
@@ -236,6 +256,7 @@ function App() {
 
         <Footer />
         <BackToTop />
+        <EmergencyCleanup />
       </div>
     </ThemeProvider>
   );
