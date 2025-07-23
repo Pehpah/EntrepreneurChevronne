@@ -113,18 +113,17 @@ function App() {
   }, [currentPage, categorySlug, selectedArticle, searchQuery, trackPageView, trackEvent]);
 
   const handlePageChange = (page: string) => {
-    // TEMPORAIRE: Accès direct à l'admin pour diagnostic
+    console.log(`📍 Navigation vers: ${page}`);
+    
     if (page === 'admin') {
-      console.log('🔍 Tentative d\'accès admin');
-      console.log('isAuthenticated:', isAuthenticated);
-      console.log('currentUser:', currentUser);
-      
-      // Pour l'instant, permettons l'accès direct
+      console.log('🔓 ACCÈS ADMIN - BYPASS TEMPORAIRE POUR DEBUG');
+      // Bypass temporaire de l'authentification pour debug
       setCurrentPage(page as Page);
       setCategorySlug('');
       setSearchQuery('');
       setSelectedArticle(null);
       setShowLogin(false);
+      trackPageView(`/${page}`, 'Administration');
       return;
     }
     
@@ -133,6 +132,8 @@ function App() {
     setSearchQuery('');
     setSelectedArticle(null);
     setShowLogin(false);
+    
+    trackPageView(`/${page}`, page);
   };
 
   const handleCategorySelect = (slug: string) => {

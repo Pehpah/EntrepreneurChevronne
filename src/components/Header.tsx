@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Sun, Moon, Search, BookOpen, Star, TrendingUp, Users, Award, Zap } from 'lucide-react';
+import { Menu, X, Sun, Moon, Search, BookOpen, Star, TrendingUp, Users, Award, Zap, Settings } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { SearchBar } from './SearchBar';
 import { useSiteConfig } from '../hooks/useSiteConfig';
@@ -21,8 +21,7 @@ const menuItems = [
   { id: 'productivite', label: 'Productivité' },
   { id: 'temoignages', label: 'Témoignages' },
   { id: 'ressources', label: 'Ressources & Outils' },
-  { id: 'a-propos', label: 'À propos' },
-  { id: 'admin', label: 'Admin' }
+  { id: 'a-propos', label: 'À propos' }
 ];
 
 export function Header({ currentPage, onPageChange, onSearch }: HeaderProps) {
@@ -41,7 +40,6 @@ export function Header({ currentPage, onPageChange, onSearch }: HeaderProps) {
   };
 
   const LogoIcon = iconMap[siteConfig.logo.icon as keyof typeof iconMap] || BookOpen;
-
 
   return (
     <header className="bg-white dark:bg-slate-900 shadow-lg border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
@@ -75,8 +73,8 @@ export function Header({ currentPage, onPageChange, onSearch }: HeaderProps) {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
-            {menuItems.slice(0, 6).map((item) => (
+          <nav className="hidden lg:flex items-center space-x-6">
+            {menuItems.slice(0, 5).map((item) => (
               <button
                 key={item.id}
                 onClick={() => onPageChange(item.id)}
@@ -89,6 +87,19 @@ export function Header({ currentPage, onPageChange, onSearch }: HeaderProps) {
                 {item.label}
               </button>
             ))}
+            
+            {/* Admin Button - Toujours visible */}
+            <button
+              onClick={() => onPageChange('admin')}
+              className={`flex items-center space-x-1 text-sm font-medium transition-all duration-300 px-3 py-2 rounded-lg ${
+                currentPage === 'admin'
+                  ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-orange-600 dark:hover:text-orange-400'
+              }`}
+            >
+              <Settings className="h-4 w-4" />
+              <span>Admin</span>
+            </button>
           </nav>
 
           {/* Actions */}
@@ -160,6 +171,22 @@ export function Header({ currentPage, onPageChange, onSearch }: HeaderProps) {
                 {item.label}
               </button>
             ))}
+            
+            {/* Admin Button Mobile */}
+            <button
+              onClick={() => {
+                onPageChange('admin');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`flex items-center space-x-2 w-full text-left px-3 py-2 rounded-md text-base font-medium transition-all duration-300 ${
+                currentPage === 'admin'
+                  ? 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-orange-600 dark:hover:text-orange-400'
+              }`}
+            >
+              <Settings className="h-4 w-4" />
+              <span>Admin</span>
+            </button>
           </div>
         </div>
       )}
