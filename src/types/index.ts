@@ -191,3 +191,40 @@ export interface UserInvitation {
   isAccepted: boolean;
   acceptedAt?: string;
 }
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  displayName: string;
+  role: UserRole;
+  avatar?: string;
+  permissions: UserPermissions;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface AuthSession {
+  user: AuthUser;
+  token: string;
+  expiresAt: string;
+  lastActivity: string;
+}
+
+export interface SecuritySettings {
+  sessionTimeout: number; // minutes
+  maxLoginAttempts: number;
+  passwordMinLength: number;
+  requireStrongPassword: boolean;
+  enableTwoFactor: boolean;
+  allowedDomains: string[];
+}
+
+export interface LoginAttempt {
+  email: string;
+  timestamp: string;
+  success: boolean;
+  ip?: string;
+}

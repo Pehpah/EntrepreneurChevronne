@@ -3,6 +3,7 @@ import { Menu, X, Sun, Moon, Search, BookOpen, Star, TrendingUp, Users, Award, Z
 import { useTheme } from '../contexts/ThemeContext';
 import { SearchBar } from './SearchBar';
 import { useSiteConfig } from '../hooks/useSiteConfig';
+import { useAuth } from '../hooks/useAuth';
 
 interface HeaderProps {
   currentPage: string;
@@ -28,6 +29,7 @@ export function Header({ currentPage, onPageChange, onSearch }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { siteConfig } = useSiteConfig();
+  const { isAuthenticated, currentUser, logout } = useAuth();
 
   const iconMap = {
     BookOpen,
@@ -96,6 +98,28 @@ export function Header({ currentPage, onPageChange, onSearch }: HeaderProps) {
               onSearch={onSearch}
               placeholder="Rechercher des articles..."
             />
+
+            {/* User Menu */}
+            {isAuthenticated && currentUser && (
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
+                  <img
+                    src={currentUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName)}&background=f97316&color=fff`}
+                    alt={currentUser.displayName}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {currentUser.displayName}
+                  </span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="text-sm text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition-colors"
+                >
+                  Déconnexion
+                </button>
+              </div>
+            )}
 
             {/* Theme Toggle */}
             <button

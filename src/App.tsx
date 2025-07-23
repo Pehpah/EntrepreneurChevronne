@@ -17,6 +17,8 @@ import { useAnalytics } from './hooks/useAnalytics';
 import { useSEO } from './hooks/useSEO';
 import { defaultSEO, generateArticleSEO, generateCategorySEO } from './utils/seo';
 import { categories } from './data/categories';
+import { useAuth } from './hooks/useAuth';
+import { LoginForm } from './components/LoginForm';
 
 type Page = 'accueil' | 'annonceur' | 'gestion-quotidienne' | 'strategie' | 'marketing' | 'finance' | 'productivite' | 'temoignages' | 'ressources' | 'a-propos' | 'admin' | 'search' | 'article-detail';
 
@@ -25,8 +27,10 @@ function App() {
   const [categorySlug, setCategorySlug] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [showLogin, setShowLogin] = useState(false);
   
   const { trackPageView, trackEvent, trackSearch } = useAnalytics();
+  const { isAuthenticated, isLoading, hasPermission } = useAuth();
 
   // SEO Management
   const getSEOData = () => {
@@ -83,10 +87,24 @@ function App() {
   }, [currentPage, categorySlug, selectedArticle, searchQuery, trackPageView, trackEvent]);
 
   const handlePageChange = (page: string) => {
+    // Check if admin page requires authentication
+    if (page === 'admin') {
+      if (!isAuthenticated) {
+        setShowLogin(true);
+        return;
+      }
+      if (!hasPermission('canManageUsers') && !hasPermission('canManageSettings')) {
+        // Redirect to home if no admin permissions
+        setCurrentPage('accueil');
+        return;
+      }
+    }
+    
     setCurrentPage(page as Page);
     setCategorySlug('');
     setSearchQuery('');
     setSelectedArticle(null);
+    setShowLogin(false);
   };
 
   const handleCategorySelect = (slug: string) => {
@@ -115,6 +133,14 @@ function App() {
   };
 
   const renderPage = () => {
+    // Show login form if needed
+    if (showLogin) {
+      return <LoginForm onSuccess={() => {
+        setShowLogin(false);
+        setCurrentPage('admin');
+      }} />;
+    }
+
     if (currentPage === 'article-detail' && selectedArticle) {
       return (
         <ArticleDetail
