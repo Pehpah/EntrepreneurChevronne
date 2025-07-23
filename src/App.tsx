@@ -226,11 +226,34 @@ function App() {
       case 'temoignages':
         return <TestimonialsPage />;
       case 'articles':
-        return <ArticlesPage />;
+        return <ArticlesPage onArticleSelect={handleArticleSelect} />;
       case 'legal':
         return <LegalPage />;
       case 'collaborations':
         return <CollaborationsPage />;
+      case 'search':
+        return (
+          <SearchResultsPage 
+            query={searchQuery}
+            onArticleSelect={handleArticleSelect}
+          />
+        );
+      case 'article-detail':
+        return selectedArticle ? (
+          <ArticleDetail article={selectedArticle} />
+        ) : (
+          <div className="py-16 text-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Article non trouvé
+            </h2>
+            <button
+              onClick={handleBackToHome}
+              className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            >
+              Retour à l'accueil
+            </button>
+          </div>
+        );
       default:
         return (
           <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">

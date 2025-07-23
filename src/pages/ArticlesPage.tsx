@@ -4,10 +4,14 @@ import { articles } from '../data/articles';
 import { categories } from '../data/categories';
 import { Article } from '../types';
 
+interface ArticlesPageProps {
+  onArticleSelect?: (article: Article) => void;
+}
+
 type SortOption = 'recent' | 'popular' | 'alphabetical' | 'reading-time';
 type ViewMode = 'grid' | 'list';
 
-export function ArticlesPage() {
+export function ArticlesPage({ onArticleSelect }: ArticlesPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('recent');
@@ -109,7 +113,10 @@ export function ArticlesPage() {
                 {article.author}
               </div>
               
-              <button className="flex items-center text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium text-sm">
+              <button 
+                onClick={() => onArticleSelect?.(article)}
+                className="flex items-center text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium text-sm"
+              >
                 Lire l'article
                 <ArrowRight className="h-4 w-4 ml-1" />
               </button>
@@ -172,10 +179,13 @@ export function ArticlesPage() {
               {article.author}
             </div>
             
-            <button className="flex items-center text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium text-sm">
-              Lire
-              <ArrowRight className="h-4 w-4 ml-1" />
-            </button>
+                         <button 
+               onClick={() => onArticleSelect?.(article)}
+               className="flex items-center text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium text-sm"
+             >
+               Lire
+               <ArrowRight className="h-4 w-4 ml-1" />
+             </button>
           </div>
         </div>
       </div>
