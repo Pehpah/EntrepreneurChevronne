@@ -1,308 +1,226 @@
-import React, { Suspense, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ErrorBoundary } from 'react-error-boundary';
-import { Toaster } from 'react-hot-toast';
+import React, { useState, useEffect } from 'react';
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
+import { HomePage } from './pages/HomePage';
+import { CategoryPage } from './pages/CategoryPage';
+import { AboutPage } from './pages/AboutPage';
+import { AdvertiserPage } from './pages/AdvertiserPage';
+import { ResourcesPage } from './pages/ResourcesPage';
+import { AdminPage } from './pages/AdminPage';
+import { SearchResultsPage } from './pages/SearchResultsPage';
+import { ArticleDetail } from './components/ArticleDetail';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { articles } from './data/articles';
+import { Article } from './types';
+import { BackToTop } from './components/BackToTop';
+import { useAnalytics } from './hooks/useAnalytics';
+import { useSEO } from './hooks/useSEO';
+import { defaultSEO, generateArticleSEO, generateCategorySEO } from './utils/seo';
+import { categories } from './data/categories';
 
-// Context providers
-import { ThemeProvider, useTheme } from './ThemeContext';
+type Page =
+  | 'accueil'
+  | 'annonceur'
+  | 'gestion-quotidienne'
+  | 'strategie'
+  | 'marketing'
+  | 'finance'
+  | 'productivite'
+  | 'temoignages'
+  | 'ressources'
+  | 'a-propos'
+  | 'admin'
+  | 'search'
+  | 'article-detail';
 
-// Components
-import Header from './components/Header';
-import Footer from './components/Footer';
-import Sidebar from './components/Sidebar';
-import LoadingSpinner from './components/LoadingSpinner';
-import ErrorFallback from './components/ErrorFallback';
+function App() {
+  const [currentPage, setCurrentPage] = useState<Page>('accueil');
+  const [categorySlug, setCategorySlug] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
-// Pages - Lazy loading pour optimiser les performances
-const HomePage = React.lazy(() => import('./pages/HomePage'));
-const ArticlesPage = React.lazy(() => import('./pages/ArticlesPage'));
-const ArticleDetailPage = React.lazy(() => import('./pages/ArticleDetailPage'));
-const CategoriesPage = React.lazy(() => import('./pages/CategoriesPage'));
-const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
-const LoginPage = React.lazy(() => import('./pages/LoginPage'));
-const RegisterPage = React.lazy(() => import('./pages/RegisterPage'));
-const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
-const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage'));
+  const { trackPageView, trackEvent, trackSearch } = useAnalytics();
 
-// Hooks
-import { useAuth } from './hooks/useAuth';
-import { useLocalStorage } from './hooks/useLocalStorage';
-
-// Types
-interface AppProps {
-  className?: string;
-}
-
-// Composant de layout principal
-const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { theme } = useTheme();
-  const [sidebarOpen, setSidebarOpen] = useLocalStorage('sidebarOpen', false);
-
-  // Appliquer le thème au document
-  useEffect(() => {
-    document.documentElement.className = theme;
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  return (
-    <div className={`min-h-screen bg-background text-foreground transition-colors duration-300`}>
-      {/* Header */}
-      <Header 
-        onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-        sidebarOpen={sidebarOpen}
-      />
-
-      <div className="flex">
-        {/* Sidebar */}
-        <Sidebar 
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
-
-        {/* Main content */}
-        <main 
-          className={`
-            flex-1 transition-all duration-300 ease-in-out
-            ${sidebarOpen ? 'ml-64' : 'ml-0'}
-            pt-16 min-h-screen
-          `}
-        >
-          <div className="container mx-auto px-4 py-8">
-            <Suspense fallback={<LoadingSpinner />}>
-              {children}
-            </Suspense>
-          </div>
-        </main>
-      </div>
-
-      {/* Footer */}
-      <Footer />
-
-      {/* Toast notifications */}
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          className: theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900',
-        }}
-      />
-    </div>
-  );
-};
-
-// Route protégée pour les utilisateurs authentifiés
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-};
-
-// Route protégée pour les administrateurs
-const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-
-  if (!user || user.role !== 'admin') {
-    return <Navigate to="/" replace />;
-  }
-
-  return <>{children}</>;
-};
-
-// Route publique (redirige si connecté)
-const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-
-  if (user) {
-    return <Navigate to="/" replace />;
-  }
-
-  return <>{children}</>;
-};
-
-// Composant principal de l'application
-const AppContent: React.FC = () => {
-  return (
-    <Router>
-      <AppLayout>
-        <ErrorBoundary
-          FallbackComponent={ErrorFallback}
-          onError={(error, errorInfo) => {
-            console.error('Application Error:', error, errorInfo);
-            // Ici vous pouvez ajouter un service de logging comme Sentry
-          }}
-        >
-          <Routes>
-            {/* Routes publiques */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/articles" element={<ArticlesPage />} />
-            <Route path="/articles/:slug" element={<ArticleDetailPage />} />
-            <Route path="/categories" element={<CategoriesPage />} />
-            <Route path="/categories/:slug" element={<ArticlesPage />} />
-
-            {/* Routes d'authentification */}
-            <Route 
-              path="/login" 
-              element={
-                <PublicRoute>
-                  <LoginPage />
-                </PublicRoute>
-              } 
-            />
-            <Route 
-              path="/register" 
-              element={
-                <PublicRoute>
-                  <RegisterPage />
-                </PublicRoute>
-              } 
-            />
-
-            {/* Routes protégées */}
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } 
-            />
-
-            {/* Routes administrateur */}
-            <Route 
-              path="/admin/*" 
-              element={
-                <AdminRoute>
-                  <AdminDashboard />
-                </AdminRoute>
-              } 
-            />
-
-            {/* Route 404 */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </ErrorBoundary>
-      </AppLayout>
-    </Router>
-  );
-};
-
-// Composant App principal avec tous les providers
-const App: React.FC<AppProps> = ({ className }) => {
-  return (
-    <div className={className}>
-      <ThemeProvider defaultTheme="light">
-        <AppContent />
-      </ThemeProvider>
-    </div>
-  );
-};
-
-// Hook personnalisé pour accéder au contexte de l'app
-export const useApp = () => {
-  const theme = useTheme();
-  const auth = useAuth();
-
-  return {
-    ...theme,
-    ...auth,
+  // SEO Management
+  const getSEOData = () => {
+    if (selectedArticle) {
+      const category = categories.find(cat => cat.slug === selectedArticle.category);
+      return generateArticleSEO(selectedArticle, category);
+    }
+    if (categorySlug && categories.find(cat => cat.slug === categorySlug)) {
+      const category = categories.find(cat => cat.slug === categorySlug)!;
+      const categoryArticles = articles.filter(a => a.category === categorySlug);
+      return generateCategorySEO(category, categoryArticles.length);
+    }
+    return defaultSEO;
   };
-};
 
-// Configuration de l'application
-export const appConfig = {
-  name: 'Mon Application',
-  version: '1.0.0',
-  description: 'Application moderne avec React et TypeScript',
-  author: 'Votre Nom',
-  repository: 'https://github.com/votre-repo',
-  homepage: 'https://votre-site.com',
-  supportEmail: 'support@votre-site.com',
-  features: {
-    darkMode: true,
-    authentication: true,
-    adminPanel: true,
-    responsive: true,
-    pwa: true,
-  },
-  routes: {
-    home: '/',
-    articles: '/articles',
-    categories: '/categories',
-    profile: '/profile',
-    login: '/login',
-    register: '/register',
-    admin: '/admin',
-  },
-  api: {
-    baseUrl: process.env.REACT_APP_API_URL || 'http://localhost:3001/api',
-    timeout: 10000,
-    retries: 3,
-  },
-  theme: {
-    defaultTheme: 'light',
-    colors: {
-      primary: '#3b82f6',
-      secondary: '#6b7280',
-      success: '#10b981',
-      warning: '#f59e0b',
-      error: '#ef4444',
-    },
-  },
-} as const;
+  useSEO(getSEOData(), selectedArticle ? 'article' : 'website', selectedArticle);
 
-// Fonction d'initialisation de l'application
-export const initializeApp = async () => {
-  try {
-    // Initialisation des services
-    console.log(`🚀 Initialisation de ${appConfig.name} v${appConfig.version}`);
-    
-    // Vérifier la configuration
-    if (!appConfig.api.baseUrl) {
-      console.warn('⚠️ URL de l\'API non configurée');
+  // Track page views
+  useEffect(() => {
+    const getPageTitle = () => {
+      if (selectedArticle) return selectedArticle.title;
+      if (categorySlug) {
+        const category = categories.find(cat => cat.slug === categorySlug);
+        return category?.name || categorySlug;
+      }
+      switch (currentPage) {
+        case 'accueil':
+          return 'Accueil';
+        case 'a-propos':
+          return 'À propos';
+        case 'annonceur':
+          return 'Annonceur';
+        case 'ressources':
+          return 'Ressources';
+        case 'admin':
+          return 'Administration';
+        case 'search':
+          return `Recherche: ${searchQuery}`;
+        default:
+          return currentPage;
+      }
+    };
+
+    const path =
+      selectedArticle
+        ? `/article/${selectedArticle.id}`
+        : categorySlug
+        ? `/category/${categorySlug}`
+        : `/${currentPage}`;
+
+    trackPageView(path, getPageTitle());
+
+    // Track specific events
+    if (selectedArticle) {
+      trackEvent('article_view', { articleId: selectedArticle.id });
+    } else if (categorySlug) {
+      trackEvent('category_view', { category: categorySlug });
+    }
+  }, [currentPage, categorySlug, selectedArticle, searchQuery, trackPageView, trackEvent]);
+
+  const handlePageChange = (page: string) => {
+    setCurrentPage(page as Page);
+    setCategorySlug('');
+    setSearchQuery('');
+    setSelectedArticle(null);
+  };
+
+  const handleCategorySelect = (slug: string) => {
+    setCategorySlug(slug);
+    setCurrentPage(slug as Page);
+    setSelectedArticle(null);
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage('search');
+    setSelectedArticle(null);
+    trackSearch(query);
+  };
+
+  const handleArticleSelect = (article: Article) => {
+    setSelectedArticle(article);
+    setCurrentPage('article-detail');
+  };
+
+  const handleBackToHome = () => {
+    setCurrentPage('accueil');
+    setSelectedArticle(null);
+    setSearchQuery('');
+    setCategorySlug('');
+  };
+
+  const renderPage = () => {
+    if (currentPage === 'article-detail' && selectedArticle) {
+      return (
+        <ArticleDetail
+          article={selectedArticle}
+          onBack={handleBackToHome}
+        />
+      );
     }
 
-    // Initialiser les services externes si nécessaire
-    // await initializeAnalytics();
-    // await initializeErrorReporting();
-    
-    console.log('✅ Application initialisée avec succès');
-    return true;
-  } catch (error) {
-    console.error('❌ Erreur lors de l\'initialisation:', error);
-    return false;
-  }
-};
+    if (currentPage === 'search') {
+      return (
+        <SearchResultsPage
+          searchQuery={searchQuery}
+          articles={articles}
+          onArticleSelect={handleArticleSelect}
+          onBack={handleBackToHome}
+        />
+      );
+    }
 
-// Gestionnaire d'erreurs global
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('Promesse rejetée non gérée:', event.reason);
-  // Ici vous pouvez ajouter un service de logging
-});
+    switch (currentPage) {
+      case 'accueil':
+        return (
+          <HomePage
+            articles={articles}
+            onArticleSelect={handleArticleSelect}
+            onCategorySelect={handleCategorySelect}
+          />
+        );
+      case 'a-propos':
+        return <AboutPage />;
+      case 'annonceur':
+        return <AdvertiserPage />;
+      case 'ressources':
+        return <ResourcesPage />;
+      case 'admin':
+        return <AdminPage />;
+      case 'gestion-quotidienne':
+      case 'strategie':
+      case 'marketing':
+      case 'finance':
+      case 'productivite':
+      case 'temoignages':
+        return (
+          <CategoryPage
+            categorySlug={currentPage}
+            articles={articles}
+            onArticleSelect={handleArticleSelect}
+          />
+        );
+      default:
+        return (
+          <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+                Page en construction
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 mb-8">
+                Cette section sera bientôt disponible !
+              </p>
+              <button
+                onClick={handleBackToHome}
+                className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-300"
+              >
+                Retour à l'accueil
+              </button>
+            </div>
+          </div>
+        );
+    }
+  };
 
-window.addEventListener('error', (event) => {
-  console.error('Erreur JavaScript non gérée:', event.error);
-  // Ici vous pouvez ajouter un service de logging
-});
-
-// Initialiser l'application au chargement
-if (typeof window !== 'undefined') {
-  initializeApp();
+  return (
+    <ThemeProvider>
+      <div className="min-h-screen flex flex-col">
+        <Header
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onSearch={handleSearch}
+        />
+        <main className="flex-1">
+          {renderPage()}
+        </main>
+        <Footer />
+        <BackToTop />
+      </div>
+    </ThemeProvider>
+  );
 }
 
 export default App;
