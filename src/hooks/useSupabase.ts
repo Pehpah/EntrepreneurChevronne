@@ -19,6 +19,14 @@ export function useSupabaseStorage<T>(
     const fetchValue = async () => {
       try {
         setLoading(true)
+        
+        // En mode développement avec placeholder, utiliser la valeur par défaut
+        if (import.meta.env.VITE_SUPABASE_URL?.includes('placeholder')) {
+          setStoredValue(initialValue)
+          setLoading(false)
+          return
+        }
+
         const { data, error } = await supabase
           .from(table)
           .select('*')
@@ -35,18 +43,25 @@ export function useSupabaseStorage<T>(
       } catch (err) {
         console.error(`Error fetching ${key} from ${table}:`, err)
         setError(err instanceof Error ? err.message : 'Unknown error')
+        // En cas d'erreur, utiliser la valeur par défaut
+        setStoredValue(initialValue)
       } finally {
         setLoading(false)
       }
     }
 
     fetchValue()
-  }, [table, key, tempUserId])
+  }, [table, key, tempUserId, initialValue])
 
   const setValue = async (value: T | ((val: T) => T)) => {
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value
       setStoredValue(valueToStore)
+
+      // En mode développement avec placeholder, ne pas essayer de sauvegarder
+      if (import.meta.env.VITE_SUPABASE_URL?.includes('placeholder')) {
+        return
+      }
 
       const { error } = await supabase
         .from(table)
@@ -80,6 +95,15 @@ export function useArticles() {
   const fetchArticles = async () => {
     try {
       setLoading(true)
+      
+      // En mode développement avec placeholder, utiliser les données statiques
+      if (import.meta.env.VITE_SUPABASE_URL?.includes('placeholder')) {
+        const { articles: staticArticles } = await import('../data/articles')
+        setArticles(staticArticles)
+        setLoading(false)
+        return
+      }
+
       const { data, error } = await supabase
         .from('articles')
         .select('*')
@@ -90,6 +114,13 @@ export function useArticles() {
     } catch (err) {
       console.error('Error fetching articles:', err)
       setError(err instanceof Error ? err.message : 'Unknown error')
+      // En cas d'erreur, utiliser les données statiques comme fallback
+      try {
+        const { articles: staticArticles } = await import('../data/articles')
+        setArticles(staticArticles)
+      } catch (importErr) {
+        console.error('Error importing static articles:', importErr)
+      }
     } finally {
       setLoading(false)
     }
@@ -97,6 +128,18 @@ export function useArticles() {
 
   const createArticle = async (article: any) => {
     try {
+      // En mode développement avec placeholder, simuler la création
+      if (import.meta.env.VITE_SUPABASE_URL?.includes('placeholder')) {
+        const newArticle = {
+          ...article,
+          id: Date.now().toString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+        setArticles(prev => [newArticle, ...prev])
+        return newArticle
+      }
+
       const { data, error } = await supabase
         .from('articles')
         .insert([article])
@@ -114,6 +157,15 @@ export function useArticles() {
 
   const updateArticle = async (id: string, updates: any) => {
     try {
+      // En mode développement avec placeholder, simuler la mise à jour
+      if (import.meta.env.VITE_SUPABASE_URL?.includes('placeholder')) {
+        const updatedArticle = { ...updates, id, updated_at: new Date().toISOString() }
+        setArticles(prev => prev.map(article => 
+          article.id === id ? { ...article, ...updatedArticle } : article
+        ))
+        return updatedArticle
+      }
+
       const { data, error } = await supabase
         .from('articles')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -134,6 +186,12 @@ export function useArticles() {
 
   const deleteArticle = async (id: string) => {
     try {
+      // En mode développement avec placeholder, simuler la suppression
+      if (import.meta.env.VITE_SUPABASE_URL?.includes('placeholder')) {
+        setArticles(prev => prev.filter(article => article.id !== id))
+        return
+      }
+
       const { error } = await supabase
         .from('articles')
         .delete()

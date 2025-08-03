@@ -19,7 +19,7 @@ type Page = 'accueil' | 'annonceur' | 'gestion-quotidienne' | 'strategie' | 'mar
 function App() {
   const { articles, loading: articlesLoading } = useArticles();
   const [currentPage, setCurrentPage] = useState<Page>('accueil');
-  const [categorySlug, setCategorySlug] = useState<string>('');
+  const [, setCategorySlug] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 

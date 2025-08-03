@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Sun, Moon, Search, BookOpen } from 'lucide-react';
+import { Menu, X, Sun, Moon, BookOpen } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { SearchBar } from './SearchBar';
 

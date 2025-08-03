@@ -12,7 +12,7 @@ vi.mock('../../hooks/useSupabase', () => ({
   })
 }))
 
-const HeaderWithProviders = ({ children, ...props }: any) => (
+const HeaderWithProviders = ({ children, ...props }: React.PropsWithChildren<any>) => (
   <ThemeProvider>
     <Header {...props} />
     {children}
@@ -53,8 +53,8 @@ describe('Header', () => {
   it('renders search functionality', () => {
     render(<HeaderWithProviders {...defaultProps} />)
     
-    // Vérifier que la barre de recherche est présente
-    const searchInput = screen.getByPlaceholderText(/rechercher/i)
-    expect(searchInput).toBeInTheDocument()
+    // Vérifier que l'icône de recherche est présente
+    const searchIcon = screen.getByTestId('search-button')
+    expect(searchIcon).toBeInTheDocument()
   })
 })

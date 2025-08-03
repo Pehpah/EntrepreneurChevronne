@@ -41,3 +41,33 @@ global.process = {
     VITE_SUPABASE_ANON_KEY: 'test-key',
   }
 } as any
+
+// Mock Supabase globalement
+vi.mock('@supabase/supabase-js', () => ({
+  createClient: vi.fn(() => ({
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          single: vi.fn(() => Promise.resolve({ data: null, error: null }))
+        })),
+        order: vi.fn(() => Promise.resolve({ data: [], error: null }))
+      })),
+      upsert: vi.fn(() => Promise.resolve({ error: null })),
+      insert: vi.fn(() => ({
+        select: vi.fn(() => ({
+          single: vi.fn(() => Promise.resolve({ data: { id: '1' }, error: null }))
+        }))
+      })),
+      update: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          select: vi.fn(() => ({
+            single: vi.fn(() => Promise.resolve({ data: { id: '1' }, error: null }))
+          }))
+        }))
+      })),
+      delete: vi.fn(() => ({
+        eq: vi.fn(() => Promise.resolve({ error: null }))
+      }))
+    }))
+  }))
+}))
