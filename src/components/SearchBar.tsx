@@ -51,6 +51,7 @@ export function SearchBar({ onSearch, placeholder = "Rechercher...", className =
       ) : (
         <button
           onClick={() => setIsExpanded(true)}
+          data-testid="search-button"
           className="p-2 text-slate-600 hover:text-orange-600 dark:text-slate-400 dark:hover:text-orange-400 transition-colors duration-300"
         >
           <Search className="h-5 w-5" />

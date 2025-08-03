@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Eye, Save, X, Upload, Calendar, Tag, User, Clock } from 'lucide-react';
 import { Article } from '../types';
-import { articles as initialArticles } from '../data/articles';
+import { useArticles } from '../hooks/useSupabase';
 import { categories } from '../data/categories';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 export function AdminPage() {
-  const [articles, setArticles] = useState<Article[]>(initialArticles);
+  const { 
+    articles, 
+    loading: articlesLoading, 
+    error: articlesError,
+    createArticle,
+    updateArticle,
+    deleteArticle
+  } = useArticles();
   const [isEditing, setIsEditing] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -28,32 +36,34 @@ export function AdminPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newArticle: Article = {
-      id: editingArticle?.id || Date.now().toString(),
-      title: formData.title,
-      excerpt: formData.excerpt,
-      content: formData.content,
-      category: formData.category,
-      author: formData.author,
-      publishedAt: editingArticle?.publishedAt || new Date().toISOString().split('T')[0],
-      readTime: Math.ceil(formData.content.split(' ').length / 200),
-      image: formData.image || 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg',
-      tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-      featured: formData.featured
-    };
+    try {
+      const articleData = {
+        title: formData.title,
+        excerpt: formData.excerpt,
+        content: formData.content,
+        category: formData.category,
+        author: formData.author,
+        published_at: editingArticle?.published_at || new Date().toISOString().split('T')[0],
+        read_time: Math.ceil(formData.content.split(' ').length / 200),
+        image: formData.image || 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg',
+        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        featured: formData.featured
+      };
 
-    if (editingArticle) {
-      setArticles(prev => prev.map(article => 
-        article.id === editingArticle.id ? newArticle : article
-      ));
-    } else {
-      setArticles(prev => [newArticle, ...prev]);
+      if (editingArticle) {
+        await updateArticle(editingArticle.id, articleData);
+      } else {
+        await createArticle(articleData);
+      }
+
+      resetForm();
+    } catch (error) {
+      console.error('Error saving article:', error);
+      alert('Erreur lors de la sauvegarde de l\'article');
     }
-
-    resetForm();
   };
 
   const handleEdit = (article: Article) => {
@@ -71,9 +81,14 @@ export function AdminPage() {
     setIsEditing(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
-      setArticles(prev => prev.filter(article => article.id !== id));
+      try {
+        await deleteArticle(id);
+      } catch (error) {
+        console.error('Error deleting article:', error);
+        alert('Erreur lors de la suppression de l\'article');
+      }
     }
   };
 
@@ -96,6 +111,25 @@ export function AdminPage() {
   const togglePreview = () => {
     setShowPreview(!showPreview);
   };
+
+  if (articlesLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (articlesError) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Erreur de chargement</h2>
+          <p className="text-slate-600 dark:text-slate-400">{articlesError}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
