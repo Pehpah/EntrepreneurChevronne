@@ -23,6 +23,8 @@ Le blog sera accessible sur `http://localhost:5173`
 ✅ **Thème sombre/clair** : Persistant localement  
 ✅ **Recherche d'articles** : Fonctionnelle  
 ✅ **Design responsive** : Optimisé mobile/desktop  
+✅ **SEO optimisé** : Métadonnées dynamiques, Open Graph, JSON-LD  
+✅ **Analytics** : Tracking des événements et pages vues  
 
 ## 🗄️ Configuration Supabase (Optionnel)
 
@@ -94,8 +96,9 @@ Accédez à `/admin` pour :
 
 1. **Personnalisation** : Modifiez les couleurs dans `tailwind.config.js`
 2. **Contenu** : Ajoutez vos articles via l'interface admin
-3. **Déploiement** : Utilisez Vercel/Netlify (configurations incluses)
-4. **SEO** : Complétez les métadonnées dans `index.html`
+3. **Analytics** : Configurez Google Analytics dans `index.html`
+4. **SEO** : Ajoutez votre image Open Graph (`/og-image.jpg`)
+5. **Déploiement** : Utilisez Vercel/Netlify (configurations incluses)
 
 ---
 

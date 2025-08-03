@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
@@ -13,15 +13,93 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { useArticles } from './hooks/useSupabase';
 import { Article } from './types';
 import { BackToTop } from './components/BackToTop';
+import { useAnalytics } from './hooks/useAnalytics';
+import { useSEO } from './hooks/useSEO';
+import { defaultSEO, generateArticleSEO, generateCategorySEO } from './utils/seo';
+import { categories } from './data/categories';
 
-type Page = 'accueil' | 'annonceur' | 'gestion-quotidienne' | 'strategie' | 'marketing' | 'finance' | 'productivite' | 'temoignages' | 'ressources' | 'a-propos' | 'admin' | 'search' | 'article-detail';
+type Page =
+  | 'accueil'
+  | 'annonceur'
+  | 'gestion-quotidienne'
+  | 'strategie'
+  | 'marketing'
+  | 'finance'
+  | 'productivite'
+  | 'temoignages'
+  | 'ressources'
+  | 'a-propos'
+  | 'admin'
+  | 'search'
+  | 'article-detail';
 
 function App() {
   const { articles, loading: articlesLoading } = useArticles();
   const [currentPage, setCurrentPage] = useState<Page>('accueil');
-  const [, setCategorySlug] = useState<string>('');
+  const [categorySlug, setCategorySlug] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+
+  const { trackPageView, trackEvent, trackSearch } = useAnalytics();
+
+  // SEO Management
+  const getSEOData = () => {
+    if (selectedArticle) {
+      const category = categories.find(cat => cat.slug === selectedArticle.category);
+      return generateArticleSEO(selectedArticle, category);
+    }
+    if (categorySlug && categories.find(cat => cat.slug === categorySlug)) {
+      const category = categories.find(cat => cat.slug === categorySlug)!;
+      const categoryArticles = articles.filter(a => a.category === categorySlug);
+      return generateCategorySEO(category, categoryArticles.length);
+    }
+    return defaultSEO;
+  };
+
+  useSEO(getSEOData(), selectedArticle ? 'article' : 'website', selectedArticle);
+
+  // Track page views
+  useEffect(() => {
+    const getPageTitle = () => {
+      if (selectedArticle) return selectedArticle.title;
+      if (categorySlug) {
+        const category = categories.find(cat => cat.slug === categorySlug);
+        return category?.name || categorySlug;
+      }
+      switch (currentPage) {
+        case 'accueil':
+          return 'Accueil';
+        case 'a-propos':
+          return 'À propos';
+        case 'annonceur':
+          return 'Annonceur';
+        case 'ressources':
+          return 'Ressources';
+        case 'admin':
+          return 'Administration';
+        case 'search':
+          return `Recherche: ${searchQuery}`;
+        default:
+          return currentPage;
+      }
+    };
+
+    const path =
+      selectedArticle
+        ? `/article/${selectedArticle.id}`
+        : categorySlug
+        ? `/category/${categorySlug}`
+        : `/${currentPage}`;
+
+    trackPageView(path, getPageTitle());
+
+    // Track specific events
+    if (selectedArticle) {
+      trackEvent('article_view', { articleId: selectedArticle.id });
+    } else if (categorySlug) {
+      trackEvent('category_view', { category: categorySlug });
+    }
+  }, [currentPage, categorySlug, selectedArticle, searchQuery, trackPageView, trackEvent]);
 
   const handlePageChange = (page: string) => {
     setCurrentPage(page as Page);
@@ -40,6 +118,7 @@ function App() {
     setSearchQuery(query);
     setCurrentPage('search');
     setSelectedArticle(null);
+    trackSearch(query);
   };
 
   const handleArticleSelect = (article: Article) => {

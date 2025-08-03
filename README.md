@@ -20,6 +20,9 @@ Un blog moderne pour entrepreneurs utilisant React, TypeScript, Tailwind CSS et 
 - ✅ Newsletter
 - ✅ Responsive design
 - ✅ Stockage Supabase
+- ✅ **SEO optimisé** : Métadonnées dynamiques, Open Graph, Twitter Cards, JSON-LD
+- ✅ **Analytics intégrées** : Tracking des pages vues, événements, recherches
+- ✅ **Performance** : Lazy loading, optimisations automatiques
 
 ## 🛠️ Installation et configuration
 
@@ -116,6 +119,8 @@ src/
 │   └── ...
 ├── hooks/              # Hooks personnalisés
 │   ├── useSupabase.ts  # Hooks Supabase
+│   ├── useAnalytics.ts # Analytics et tracking
+│   ├── useSEO.ts       # Gestion SEO dynamique
 │   └── useLocalStorage.ts
 ├── contexts/           # Contextes React
 │   └── ThemeContext.tsx
@@ -125,7 +130,8 @@ src/
 │   └── index.ts
 ├── utils/             # Utilitaires
 │   ├── dateUtils.ts
-│   └── textUtils.ts
+│   ├── textUtils.ts
+│   └── seo.ts         # Utilitaires SEO
 └── data/              # Données statiques (backup)
     ├── articles.ts
     └── categories.ts
@@ -147,6 +153,29 @@ Accédez à `/admin` pour :
 - Gérer les catégories
 - Prévisualiser les articles
 - Gérer la newsletter
+
+## 🔍 SEO et Analytics
+
+### SEO Automatique
+- **Métadonnées dynamiques** : Titre, description, mots-clés par page
+- **Open Graph** : Partage optimisé sur réseaux sociaux
+- **Twitter Cards** : Aperçus enrichis sur Twitter
+- **JSON-LD Schema** : Données structurées pour les moteurs de recherche
+- **Sitemap automatique** : Indexation optimisée
+
+### Analytics Intégrées
+- **Page views** : Suivi des visites par page
+- **Événements** : Clics, recherches, interactions
+- **Lecture d'articles** : Temps de lecture, engagement
+- **Newsletter** : Suivi des inscriptions
+- **Recherches** : Termes les plus recherchés
+
+### Configuration Analytics
+Pour activer Google Analytics, ajoutez votre ID dans `index.html` :
+```html
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+```
 
 ## 🔒 Sécurité
 
