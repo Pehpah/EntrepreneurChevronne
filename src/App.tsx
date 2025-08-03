@@ -10,13 +10,14 @@ import { AdminPage } from './pages/AdminPage';
 import { SearchResultsPage } from './pages/SearchResultsPage';
 import { ArticleDetail } from './components/ArticleDetail';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { articles } from './data/articles';
+import { useArticles } from './hooks/useSupabase';
 import { Article } from './types';
 import { BackToTop } from './components/BackToTop';
 
 type Page = 'accueil' | 'annonceur' | 'gestion-quotidienne' | 'strategie' | 'marketing' | 'finance' | 'productivite' | 'temoignages' | 'ressources' | 'a-propos' | 'admin' | 'search' | 'article-detail';
 
 function App() {
+  const { articles, loading: articlesLoading } = useArticles();
   const [currentPage, setCurrentPage] = useState<Page>('accueil');
   const [categorySlug, setCategorySlug] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -136,7 +137,16 @@ function App() {
         />
         
         <main className="flex-1">
-          {renderPage()}
+          {articlesLoading && currentPage !== 'admin' ? (
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                <p className="text-slate-600 dark:text-slate-400">Chargement...</p>
+              </div>
+            </div>
+          ) : (
+            renderPage()
+          )}
         </main>
 
         <Footer />
