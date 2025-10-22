@@ -10,13 +10,37 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('blog-theme');
-    return (saved as Theme) || 'light';
-  });
+  const [theme, setTheme] = useState<Theme>('light');
 
+  // Load theme from storage on mount
   useEffect(() => {
-    localStorage.setItem('blog-theme', theme);
+    const loadTheme = async () => {
+      try {
+        const { storage } = await import('../utils/storage');
+        const saved = await storage.getItem<string>('blog-theme');
+        if (saved && (saved === 'light' || saved === 'dark')) {
+          setTheme(saved as Theme);
+        }
+      } catch (error) {
+        console.error('Error loading theme from storage:', error);
+      }
+    };
+    loadTheme();
+  }, []);
+
+  // Save theme to storage and apply to document
+  useEffect(() => {
+    const saveTheme = async () => {
+      try {
+        const { storage } = await import('../utils/storage');
+        await storage.setItem('blog-theme', theme);
+      } catch (error) {
+        console.error('Error saving theme to storage:', error);
+      }
+    };
+    
+    saveTheme();
+    
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {

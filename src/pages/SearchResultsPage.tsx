@@ -2,20 +2,19 @@ import React from 'react';
 import { Search, ArrowLeft } from 'lucide-react';
 import { Article } from '../types';
 import { ArticleCard } from '../components/ArticleCard';
+import { articles } from '../data/articles';
 
 interface SearchResultsPageProps {
-  searchQuery: string;
-  articles: Article[];
+  query: string;
   onArticleSelect: (article: Article) => void;
-  onBack: () => void;
 }
 
-export function SearchResultsPage({ searchQuery, articles, onArticleSelect, onBack }: SearchResultsPageProps) {
+export function SearchResultsPage({ query, onArticleSelect }: SearchResultsPageProps) {
   const searchResults = articles.filter(article => 
-    article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    article.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    article.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    article.title.toLowerCase().includes(query.toLowerCase()) ||
+    article.excerpt.toLowerCase().includes(query.toLowerCase()) ||
+    article.content.toLowerCase().includes(query.toLowerCase()) ||
+    article.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
   );
 
   return (
@@ -24,7 +23,7 @@ export function SearchResultsPage({ searchQuery, articles, onArticleSelect, onBa
       <section className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <button
-            onClick={onBack}
+            onClick={() => window.history.back()}
             className="inline-flex items-center space-x-2 text-slate-600 hover:text-orange-600 dark:text-slate-400 dark:hover:text-orange-400 transition-colors duration-300 mb-6"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -38,7 +37,7 @@ export function SearchResultsPage({ searchQuery, articles, onArticleSelect, onBa
                 Résultats de recherche
               </h1>
               <p className="text-slate-600 dark:text-slate-400">
-                {searchResults.length} résultat{searchResults.length !== 1 ? 's' : ''} pour "{searchQuery}"
+                {searchResults.length} résultat{searchResults.length !== 1 ? 's' : ''} pour "{query}"
               </p>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
@@ -8,25 +8,153 @@ import { AdvertiserPage } from './pages/AdvertiserPage';
 import { ResourcesPage } from './pages/ResourcesPage';
 import { AdminPage } from './pages/AdminPage';
 import { SearchResultsPage } from './pages/SearchResultsPage';
+import { TestimonialsPage } from './pages/TestimonialsPage';
+import { LegalPage } from './pages/LegalPage';
+import { CollaborationsPage } from './pages/CollaborationsPage';
+import { ArticlesPage } from './pages/ArticlesPage';
 import { ArticleDetail } from './components/ArticleDetail';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { articles } from './data/articles';
 import { Article } from './types';
 import { BackToTop } from './components/BackToTop';
+import { useAnalytics } from './hooks/useAnalytics';
+import { useSEO } from './hooks/useSEO';
+import { defaultSEO, generateArticleSEO, generateCategorySEO } from './utils/seo';
+import { categories } from './data/categories';
+import { useAuth } from './hooks/useAuth';
+import { LoginForm } from './components/LoginForm';
+import { EmergencyCleanup } from './components/EmergencyCleanup';
+import { autoCleanupIfNeeded } from './utils/storageCleanup';
+import { EMERGENCY_RESET, checkStorageStatus, testLocalStorageWrite } from './utils/emergencyCleanup';
+import { storage } from './utils/storage';
 
-type Page = 'accueil' | 'annonceur' | 'gestion-quotidienne' | 'strategie' | 'marketing' | 'finance' | 'productivite' | 'temoignages' | 'ressources' | 'a-propos' | 'admin' | 'search' | 'article-detail';
+type Page = 'accueil' | 'annonceur' | 'gestion-quotidienne' | 'strategie' | 'marketing' | 'finance' | 'productivite' | 'temoignages' | 'ressources' | 'a-propos' | 'admin' | 'search' | 'article-detail' | 'articles' | 'legal' | 'collaborations';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('accueil');
   const [categorySlug, setCategorySlug] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [showLogin, setShowLogin] = useState(false);
+  
+  const { trackPageView, trackEvent, trackSearch } = useAnalytics();
+  const { isAuthenticated, isLoading, hasPermission } = useAuth();
+
+  // Migration from localStorage to IndexedDB on startup
+  useEffect(() => {
+    const initializeStorage = async () => {
+      try {
+        console.log('🔄 Initializing storage and migrating from localStorage...');
+        
+        // Migrate existing localStorage data to IndexedDB
+        await storage.migrate();
+        
+        console.log('✅ Storage migration completed successfully');
+      } catch (error) {
+        console.error('❌ Storage initialization failed:', error);
+        
+        // Fallback: still check localStorage if IndexedDB fails
+        console.log('🔍 Fallback: checking localStorage...');
+        
+        // Test d'écriture
+        if (!testLocalStorageWrite()) {
+          console.log('🚨 localStorage défaillant, reset complet nécessaire');
+          EMERGENCY_RESET();
+          return;
+        }
+        
+        // Vérification de l'état
+        const status = checkStorageStatus();
+        if (parseFloat(status.totalMB) > 4) {
+          console.log('🚨 localStorage trop plein, reset complet...');
+          EMERGENCY_RESET();
+          return;
+        }
+        
+        // Nettoyage normal
+        autoCleanupIfNeeded();
+      }
+    };
+    
+    initializeStorage();
+  }, []);
+
+  // SEO Management
+  const getSEOData = () => {
+    if (selectedArticle) {
+      const category = categories.find(cat => cat.slug === selectedArticle.category);
+      return generateArticleSEO(selectedArticle, category);
+    }
+    
+    if (categorySlug && categories.find(cat => cat.slug === categorySlug)) {
+      const category = categories.find(cat => cat.slug === categorySlug)!;
+      const categoryArticles = articles.filter(a => a.category === categorySlug);
+      return generateCategorySEO(category, categoryArticles.length);
+    }
+    
+    return defaultSEO;
+  };
+
+  useSEO(getSEOData(), selectedArticle ? 'article' : 'website', selectedArticle);
+
+  // Track page views
+  useEffect(() => {
+    const getPageTitle = () => {
+      if (selectedArticle) return selectedArticle.title;
+      if (categorySlug) {
+        const category = categories.find(cat => cat.slug === categorySlug);
+        return category?.name || categorySlug;
+      }
+      
+      switch (currentPage) {
+        case 'accueil': return 'Accueil';
+        case 'a-propos': return 'À propos';
+        case 'annonceur': return 'Annonceur';
+        case 'ressources': return 'Ressources';
+        case 'admin': return 'Administration';
+        case 'search': return `Recherche: ${searchQuery}`;
+        default: return currentPage;
+      }
+    };
+
+    const path = selectedArticle 
+      ? `/article/${selectedArticle.id}`
+      : categorySlug 
+        ? `/category/${categorySlug}`
+        : `/${currentPage}`;
+
+    trackPageView(path, getPageTitle());
+
+    // Track specific events
+    if (selectedArticle) {
+      trackEvent('article_view', { articleId: selectedArticle.id });
+    } else if (categorySlug) {
+      trackEvent('category_view', { category: categorySlug });
+    }
+  }, [currentPage, categorySlug, selectedArticle, searchQuery, trackPageView, trackEvent]);
 
   const handlePageChange = (page: string) => {
+    console.log(`📍 Navigation vers: ${page}`);
+    
+    if (page === 'admin') {
+      console.log('🔓 ACCÈS ADMIN - BYPASS TEMPORAIRE POUR DEBUG');
+      // Bypass temporaire de l'authentification pour debug
+      setCurrentPage(page as Page);
+      setCategorySlug('');
+      setSearchQuery('');
+      setSelectedArticle(null);
+      setShowLogin(false);
+      trackPageView(`/${page}`, 'Administration');
+      return;
+    }
+    
     setCurrentPage(page as Page);
     setCategorySlug('');
     setSearchQuery('');
     setSelectedArticle(null);
+    setShowLogin(false);
+    
+    trackPageView(`/${page}`, page);
   };
 
   const handleCategorySelect = (slug: string) => {
@@ -39,6 +167,7 @@ function App() {
     setSearchQuery(query);
     setCurrentPage('search');
     setSelectedArticle(null);
+    trackSearch(query);
   };
 
   const handleArticleSelect = (article: Article) => {
@@ -54,6 +183,14 @@ function App() {
   };
 
   const renderPage = () => {
+    // Show login form if needed
+    if (showLogin) {
+      return <LoginForm onSuccess={() => {
+        setShowLogin(false);
+        setCurrentPage('admin');
+      }} />;
+    }
+
     if (currentPage === 'article-detail' && selectedArticle) {
       return (
         <ArticleDetail
@@ -65,11 +202,9 @@ function App() {
 
     if (currentPage === 'search') {
       return (
-        <SearchResultsPage
-          searchQuery={searchQuery}
-          articles={articles}
+        <SearchResultsPage 
+          query={searchQuery}
           onArticleSelect={handleArticleSelect}
-          onBack={handleBackToHome}
         />
       );
     }
@@ -96,13 +231,43 @@ function App() {
       case 'marketing':
       case 'finance':
       case 'productivite':
-      case 'temoignages':
         return (
           <CategoryPage
             categorySlug={currentPage}
             articles={articles}
             onArticleSelect={handleArticleSelect}
           />
+        );
+      case 'temoignages':
+        return <TestimonialsPage />;
+      case 'articles':
+        return <ArticlesPage onArticleSelect={handleArticleSelect} />;
+      case 'legal':
+        return <LegalPage />;
+      case 'collaborations':
+        return <CollaborationsPage />;
+      case 'search':
+        return (
+          <SearchResultsPage 
+            query={searchQuery}
+            onArticleSelect={handleArticleSelect}
+          />
+        );
+      case 'article-detail':
+        return selectedArticle ? (
+          <ArticleDetail article={selectedArticle} />
+        ) : (
+          <div className="py-16 text-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Article non trouvé
+            </h2>
+            <button
+              onClick={handleBackToHome}
+              className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            >
+              Retour à l'accueil
+            </button>
+          </div>
         );
       default:
         return (
@@ -139,8 +304,9 @@ function App() {
           {renderPage()}
         </main>
 
-        <Footer />
+        <Footer onPageChange={handlePageChange} />
         <BackToTop />
+        <EmergencyCleanup />
       </div>
     </ThemeProvider>
   );

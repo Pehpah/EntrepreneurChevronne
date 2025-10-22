@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic localStorage - Blog</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        .status.ok { background: #dcfce7; color: #166534; border: 2px solid #bbf7d0; }
+        .status.warning { background: #fef3c7; color: #92400e; border: 2px solid #fde68a; }
+        .status.error { background: #fee2e2; color: #dc2626; border: 2px solid #fecaca; }
+        
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: background 0.2s;
+        }
+        button:hover { background: #2563eb; }
+        button.danger { background: #dc2626; }
+        button.danger:hover { background: #b91c1c; }
+        button.success { background: #059669; }
+        button.success:hover { background: #047857; }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .info-card {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .info-card h3 {
+            margin: 0 0 10px 0;
+            color: #475569;
+            font-size: 14px;
+        }
+        .info-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e293b;
+        }
+        
+        code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+        }
+        
+        .logs {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Diagnostic localStorage</h1>
+        <p>Outil de diagnostic et de réparation pour les problèmes de stockage du blog.</p>
+        
+        <div id="status" class="status">
+            <strong>Vérification en cours...</strong>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Taille totale</h3>
+                <div class="value" id="totalSize">-</div>
+            </div>
+            <div class="info-card">
+                <h3>Nombre de clés</h3>
+                <div class="value" id="keyCount">-</div>
+            </div>
+            <div class="info-card">
+                <h3>Utilisation quota</h3>
+                <div class="value" id="quotaUsage">-</div>
+            </div>
+            <div class="info-card">
+                <h3>Espace libre</h3>
+                <div class="value" id="freeSpace">-</div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="checkStatus()">🔍 Vérifier l'état</button>
+            <button onclick="cleanupAnalytics()" class="success">🧹 Nettoyer Analytics</button>
+            <button onclick="emergencyReset()" class="danger">🚨 Reset d'urgence</button>
+            <button onclick="testAccess()" class="info">🔓 Tester Admin</button>
+        </div>
+        
+        <details style="margin: 20px 0;">
+            <summary style="cursor: pointer; font-weight: bold;">📋 Détails des clés localStorage</summary>
+            <div id="keyDetails" style="margin-top: 15px;"></div>
+        </details>
+        
+        <div id="logs" class="logs hidden"></div>
+        
+        <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin-top: 30px;">
+            <h3>💡 Instructions de récupération</h3>
+            <ol>
+                <li><strong>Problème mineur :</strong> Cliquez "Nettoyer Analytics"</li>
+                <li><strong>Problème majeur :</strong> Cliquez "Reset d'urgence"</li>
+                <li><strong>Console alternative :</strong> Ouvrez F12 et tapez <code>EMERGENCY_RESET()</code></li>
+                <li><strong>Admin bloqué :</strong> Après reset, cliquez "Tester Admin"</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let logs = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+            logs.push(logEntry);
+            
+            const logsDiv = document.getElementById('logs');
+            logsDiv.classList.remove('hidden');
+            logsDiv.innerHTML = logs.slice(-20).join('\n');
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            
+            console.log(logEntry);
+        }
+        
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+        
+        function getStorageSize() {
+            let total = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    total += localStorage[key].length + key.length;
+                }
+            }
+            return total;
+        }
+        
+        function checkStatus() {
+            log('Vérification de l\'état du localStorage...');
+            
+            try {
+                const keyCount = localStorage.length;
+                const totalSize = getStorageSize();
+                const maxSize = 5 * 1024 * 1024; // 5MB approximatif
+                const quotaUsage = (totalSize / maxSize) * 100;
+                const freeSpace = maxSize - totalSize;
+                
+                // Mise à jour de l'affichage
+                document.getElementById('keyCount').textContent = keyCount;
+                document.getElementById('totalSize').textContent = formatBytes(totalSize);
+                document.getElementById('quotaUsage').textContent = quotaUsage.toFixed(1) + '%';
+                document.getElementById('freeSpace').textContent = formatBytes(freeSpace);
+                
+                // Déterminer le statut
+                const statusDiv = document.getElementById('status');
+                if (quotaUsage > 90) {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '<strong>🚨 CRITIQUE:</strong> Quota localStorage dépassé ! Reset nécessaire.';
+                } else if (quotaUsage > 70) {
+                    statusDiv.className = 'status warning';
+                    statusDiv.innerHTML = '<strong>⚠️ ATTENTION:</strong> Stockage à ' + quotaUsage.toFixed(1) + '%. Nettoyage recommandé.';
+                } else {
+                    statusDiv.className = 'status ok';
+                    statusDiv.innerHTML = '<strong>✅ OK:</strong> Stockage en bon état (' + quotaUsage.toFixed(1) + '% utilisé).';
+                }
+                
+                // Détails des clés
+                updateKeyDetails();
+                
+                log(`État: ${keyCount} clés, ${formatBytes(totalSize)}, ${quotaUsage.toFixed(1)}% utilisé`);
+                
+            } catch (error) {
+                log('Erreur lors de la vérification: ' + error.message, 'error');
+                const statusDiv = document.getElementById('status');
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '<strong>❌ ERREUR:</strong> Impossible de vérifier le localStorage.';
+            }
+        }
+        
+        function updateKeyDetails() {
+            const keys = Object.keys(localStorage);
+            const keyDetails = document.getElementById('keyDetails');
+            
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<tr style="background: #e2e8f0;"><th style="padding: 8px; text-align: left;">Clé</th><th style="padding: 8px; text-align: right;">Taille</th></tr>';
+            
+            keys.sort((a, b) => {
+                const sizeA = localStorage[a].length;
+                const sizeB = localStorage[b].length;
+                return sizeB - sizeA;
+            }).forEach(key => {
+                const size = localStorage[key].length;
+                const isAnalytics = key.includes('analytics');
+                const rowStyle = isAnalytics ? 'background: #fef3c7;' : '';
+                html += `<tr style="${rowStyle}"><td style="padding: 8px; font-family: monospace;">${key}</td><td style="padding: 8px; text-align: right;">${formatBytes(size)}</td></tr>`;
+            });
+            
+            html += '</table>';
+            keyDetails.innerHTML = html;
+        }
+        
+        function cleanupAnalytics() {
+            log('Nettoyage des données analytics...');
+            
+            let cleaned = 0;
+            const keysToClean = ['analytics-events', 'analytics-pageviews', 'analytics-sessions'];
+            
+            keysToClean.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    localStorage.removeItem(key);
+                    cleaned++;
+                }
+            });
+            
+            log(`${cleaned} clés analytics supprimées`);
+            
+            // Re-vérifier l'état
+            setTimeout(checkStatus, 500);
+        }
+        
+        function emergencyReset() {
+            if (!confirm('⚠️ ATTENTION: Ceci va supprimer TOUTES les données localStorage sauf les paramètres importants. Continuer ?')) {
+                return;
+            }
+            
+            log('RESET D\'URGENCE EN COURS...', 'warning');
+            
+            try {
+                // Sauvegarder les données importantes
+                const importantData = {};
+                const importantKeys = ['site-config', 'theme-preference', 'user-preferences'];
+                
+                importantKeys.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value) {
+                        importantData[key] = value;
+                    }
+                });
+                
+                // Nettoyer tout
+                localStorage.clear();
+                
+                // Restaurer les données importantes
+                Object.keys(importantData).forEach(key => {
+                    localStorage.setItem(key, importantData[key]);
+                });
+                
+                log('Reset d\'urgence terminé. Données importantes préservées.', 'success');
+                
+                // Recharger la page après un délai
+                setTimeout(() => {
+                    log('Rechargement de la page...', 'info');
+                    window.location.reload();
+                }, 2000);
+                
+            } catch (error) {
+                log('Erreur lors du reset: ' + error.message, 'error');
+            }
+        }
+        
+        function testAccess() {
+            log('Test d\'accès à l\'admin...');
+            
+            try {
+                // Tenter d'accéder à l'admin
+                const adminUrl = window.location.origin + '/#admin';
+                window.open(adminUrl, '_blank');
+                log('Ouverture de l\'admin dans un nouvel onglet');
+            } catch (error) {
+                log('Erreur lors du test d\'accès: ' + error.message, 'error');
+            }
+        }
+        
+        // Vérification automatique au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            log('Diagnostic localStorage initialisé');
+            checkStatus();
+        });
+        
+        // Exposer les fonctions globalement pour la console
+        window.EMERGENCY_RESET = emergencyReset;
+        window.CLEANUP_ANALYTICS = cleanupAnalytics;
+        window.CHECK_STATUS = checkStatus;
+    </script>
+</body>
+</html>
